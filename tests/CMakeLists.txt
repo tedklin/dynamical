@@ -15,8 +15,8 @@ macro(package_add_test TESTNAME)
   # link the Google test infrastructure, mocking library, and a default main fuction to
   # the test executable.  Remove g_test_main if writing your own main function.
   target_link_libraries(${TESTNAME} gtest gmock gtest_main)
-  # also link our own library cmake_sandbox_lib (along with PUBLIC eigen)
-  target_link_libraries(${TESTNAME} cmake_sandbox_lib)
+  # also link our own library dynamical_lib (along with PUBLIC eigen)
+  target_link_libraries(${TESTNAME} dynamical_lib)
 
   # gtest_discover_tests replaces gtest_add_tests,
   # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it

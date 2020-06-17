@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 # 3.11 minimum (FetchContent), 3.14 preferred
 
-project(cmake_sandbox LANGUAGES CXX)
+project(dynamical LANGUAGES CXX)
 
 # Only do these if this is the main project, 
 # and not if it is included through add_subdirectory

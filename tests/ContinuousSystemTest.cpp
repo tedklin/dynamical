@@ -1,4 +1,4 @@
-#include "cmake_sandbox/ContinuousSystem.h"
+#include "dynamical/ContinuousSystem.h"
 
 #include "Eigen/Eigen"
 #include "gtest/gtest.h"
