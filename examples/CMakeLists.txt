@@ -8,5 +8,5 @@ macro(package_add_example EXAMPLENAME)
   target_link_libraries(${EXAMPLENAME} PRIVATE dynamical_lib)
 endmacro()
 
-package_add_example(salto SaltoJumpingRobot.cpp)
+# package_add_example(salto SaltoJumpingRobot.cpp)
 # ^ ADD MORE EXAMPLE EXECUTABLES HERE

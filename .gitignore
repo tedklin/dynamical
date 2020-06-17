@@ -6,6 +6,8 @@
 # here AFTER you ensure it builds on CMake alone!!
 hidden_thirdparty/
 
+.gdb_history
+
 # ================
 
 # https://github.com/github/gitignore/blob/master/CMake.gitignore
