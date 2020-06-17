@@ -1,0 +1,29 @@
+language: C++
+dist: bionic
+compiler: gcc
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - libeigen3-dev
+script:
+  # failed attempt at installing and using latest of cmake
+  # - sudo apt purge --auto-remove cmake
+  # - sudo apt-get update
+  # - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+  # - sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  # - sudo apt-get update
+  # - sudo apt-get install cmake
+  # - cmake -S . -B build
+  # - cmake --build build
+  # - cmake --build build --target test
+
+  # classic cmake build procedure
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - cd ..
+  - cmake --build build --target test
+  

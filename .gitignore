@@ -1,0 +1,78 @@
+# CUSTOM =========
+
+# I use this directory to store a copy of libraries like gtest so VSCode
+# can still use autocomplete (after manually setting include paths).
+# This is generally considered bad practice, so only store copies of libraries
+# here AFTER you ensure it builds on CMake alone!!
+hidden_thirdparty/
+
+# ================
+
+# https://github.com/github/gitignore/blob/master/CMake.gitignore
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# https://github.com/autodiff/autodiff/blob/master/.gitignore
+# Build files
+build/
+
+# conda
+environment.yml
+
+# mkdocs
+site/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Python cache files
+__pycache__/
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Eclipse files
+.cproject
+.project
+language.settings.xml
+
+# VSCode files
+.vscode/
+
+# Qt Creator files
+CMakeLists.txt.user
