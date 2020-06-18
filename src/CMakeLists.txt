@@ -1,7 +1,7 @@
 # Note that headers are optional, and do not affect add_library, but they will not
 # show up in IDEs unless they are listed in add_library.
 
-# list(APPEND HEADER_LIST "${PROJECT_SOURCE_DIR}/include/dynamical/ContinuousSystem.h")
+list(APPEND HEADER_LIST "${PROJECT_SOURCE_DIR}/include/dynamical/state_space/plant.h")
 # ^ APPEND NEW HEADERS TO THE HEADER_LIST
 
 list(APPEND SOURCE_LIST "${PROJECT_SOURCE_DIR}/src/placeholder.cpp")

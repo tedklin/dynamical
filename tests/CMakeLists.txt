@@ -29,5 +29,5 @@ set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 endmacro()
 
 
-# package_add_test(ContinuousSystemTest ContinuousSystemTest.cpp)
+package_add_test(plant_test plant_test.cpp)
 # ^ ADD NEW TESTS HERE
