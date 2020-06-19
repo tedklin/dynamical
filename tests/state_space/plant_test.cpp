@@ -45,11 +45,14 @@ TEST(PlantTest, DefaultArgumentCheck) {
 }
 
 TEST(PlantTest, PropagateDiscreteDynamics) {
+  // this test is based on example 2 in EECS16B lecture 8A, spring 2020
+  // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_states>;
 
-  // need to explicitly define A and B to ensure reachability
+  // explicitly define A and B matrices for system that we know is controllable
   SISOPlant::A_matrix_type test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
@@ -60,10 +63,12 @@ TEST(PlantTest, PropagateDiscreteDynamics) {
   SISOPlant plant(x_initial, test_A, test_B);
 
   SISOPlant::x_vector_type x_target = SISOPlant::x_vector_type::Random();
-  Eigen::Matrix2d reachability_matrix =
-      dynamical::analysis::get_reachability_matrix(plant);
+  Eigen::Matrix2d controllability_matrix =
+      dynamical::analysis::get_controllability_matrix(plant);
+
+  // calculate a two-step input sequence that should get us to the target state
   Eigen::Vector2d inverted_input_sequence =
-      reachability_matrix.inverse() *
+      controllability_matrix.inverse() *
       (x_target - (plant.A_ * plant.A_ * x_initial));
 
   ASSERT_TRUE(test_utils::check_matrix_equality(x_initial, plant.GetX()));
@@ -73,11 +78,11 @@ TEST(PlantTest, PropagateDiscreteDynamics) {
 
   // std::cout << "\nX Initial: \n" << x_initial << "\n\n";
   // std::cout << "\nX Target: \n" << x_target << "\n\n";
-  // std::cout << "\nReachability: \n" << reachability_matrix << '\n';
+  // std::cout << "\nControllability: \n" << controllability_matrix << '\n';
   // std::cout << "\nInputSequence: \n" << inverted_input_sequence << '\n';
   // std::cout << "\nX Actual: \n" << plant.GetX() << '\n';
 }
 
-// TODO: more complete testing of reachability matrix
+// TODO: more complete testing of controllability matrix
 
 }  // namespace testing

@@ -63,26 +63,27 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
 namespace analysis {
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-auto get_reachability_matrix(
+auto get_controllability_matrix(
     const dynamical::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
     int num_steps_allowed = state_dim) {
-  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> reachability_matrix(
+  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix(
       state_dim, (num_steps_allowed * input_dim));
   Eigen::Matrix<Scalar, state_dim, input_dim> step_block = plant.B_;
 
   for (int step = 0; step != num_steps_allowed; ++step) {
     for (int block_index = 0; block_index != input_dim; ++block_index) {
-      int reachability_col = (step * input_dim) + block_index;
-      reachability_matrix.col(reachability_col) = step_block.col(block_index);
+      int controllability_col = (step * input_dim) + block_index;
+      controllability_matrix.col(controllability_col) =
+          step_block.col(block_index);
     }
     step_block = plant.A_ * step_block;
   }
 
-  // TODO: this returns an entire copy, but the underlying reachability matrix
-  // will be destroyed (local lifetime) if we pass by pointer or reference. is
-  // there a more elegant way to do this without needing the user to declare the
-  // reachability matrix themselves?
-  return reachability_matrix;
+  // TODO: this returns an entire copy, but the underlying controllability
+  // matrix will be destroyed (local lifetime) if we pass by pointer or
+  // reference. is there a more elegant way to do this without needing the user
+  // to declare the controllability matrix themselves?
+  return controllability_matrix;
 }
 
 }  // namespace analysis
