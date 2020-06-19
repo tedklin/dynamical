@@ -79,10 +79,6 @@ auto get_controllability_matrix(
     step_block = plant.A_ * step_block;
   }
 
-  // TODO: this returns an entire copy, but the underlying controllability
-  // matrix will be destroyed (local lifetime) if we pass by pointer or
-  // reference. is there a more elegant way to do this without needing the user
-  // to declare the controllability matrix themselves?
   return controllability_matrix;
 }
 
