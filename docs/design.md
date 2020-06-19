@@ -1,6 +1,6 @@
 # Design document
 
-This document is intended to lay out nontrivial software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I felt it's best to expose the reasons behind every decision made, for self-reflection purposes and the opportunity to (un)learn bad C++ practices / wrong assumptions about the nature of control system design. It also helps me maintain my own sanity as the project grows and I can't remember why I did things a certain way by just looking at the code.
+This document is intended to lay out nontrivial software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I felt it's best to expose the reasons behind every decision made, for self-reflection purposes and the opportunity to (un)learn bad C++ practices / wrong assumptions about the nature of control system design. It also helps me maintain my own sanity as the project grows and I can't remember why I did certain things a certain way by just looking at the code.
 
 This document is not geared towards user documentation purposes and probably shouldn't be used as such.
 
@@ -17,7 +17,7 @@ This document is not geared towards user documentation purposes and probably sho
         - Inspired by numerous C++ libraries, including the one and only STL.
         - Can keep self-defined objects relatively "lightweight" without loss of functionality.
 3. User-focused
-    - Keep in mind the applications this library could be used in and design around that.
+    - Keep in mind the applications a library like this could be used for and design around that.
 
 ## state_space
 
@@ -45,6 +45,7 @@ This document is not geared towards user documentation purposes and probably sho
             - Having default arguments for C and D matrices adapts to both of the above situations.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
+                - It should also be noted that this breaks the good practice of ordering constructor parameters in the same order the respective member variables are declared in the class definition. I didn't want to go through repeated access specifiers (switching from public to protected and back to public), and the parameters aren't interdependent so it shouldn't matter in an egregious way.
 
 *DiscretePlant*
 - *namespace dynamical*
@@ -55,7 +56,7 @@ This document is not geared towards user documentation purposes and probably sho
 *get_controllability_matrix*
 - *namespace dynamical::analysis*
 - *type: template function*
-- Since the dimensions of the returned matrix depends on template parameters, *auto* was used as the return type. C++14 largely eliminated(?) the need for a trailing return type.
+- Since the dimensions of the returned matrix depends on template parameters, *auto* was used as the return type (no trailing return type as allowed in C++14).
 - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
     - TODO: understand this better.
 - The current implementation returns the controllability matrix by value. This could be an expensive operation if the matrix is large. The alternative is returning by reference, but since the controllability matrix is defined and created locally in the function itself, undefined behavior would result. Returning by reference would require the user to manually define their own controllability matrix first, then pass it by reference as an argument to the function. Since this is an generic analysis function that can be largely ignored in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of copying.
