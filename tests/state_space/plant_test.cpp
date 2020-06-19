@@ -44,12 +44,9 @@ TEST(PlantTest, DefaultArgumentCheck) {
   ASSERT_EQ(SimplePlant::D_matrix_type::Zero(), plant.D_);
 }
 
+// TODO: parameterize controllability matrix test?
 TEST(AnalysisTest, SISOControllabilityMatrix) {
-  // TODO: parameterize controllability matrix test?
-
-  // this test was inspired by example 2 in EECS16B lecture 8A, spring 2020
-  // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
-
+  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
@@ -101,9 +98,84 @@ TEST(AnalysisTest, MIMOControllabilityMatrix) {
       manual_controllability_matrix, calculated_controllability_matrix));
 }
 
+TEST(AnalysisTest, SISOControllableTest) {
+  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
+  using SISOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  SISOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 1, 1 /*]*/,
+      /*[*/ 0, 2 /*]]*/;
+  SISOPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 0 /*]*/,
+      /*[*/ 1 /*]]*/;
+
+  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant plant(x_initial, test_A, test_B);
+
+  ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
+}
+
+TEST(AnalysisTest, SISOUncontrollableTest) {
+  // example 3: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
+  using SISOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  SISOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 1, 1 /*]*/,
+      /*[*/ 0, 2 /*]]*/;
+  SISOPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 1 /*]*/,
+      /*[*/ 0 /*]]*/;
+
+  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant plant(x_initial, test_A, test_B);
+
+  ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
+}
+
+TEST(AnalysisTest, MIMOControllableTest) {
+  constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
+  using MIMOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  // TODO: check the math if the following is really true:
+  // the probability of getting a random uncontrollable plant with the two
+  // states and two inputs is very small. one matrix would have to be
+  // something like the identity, and the other would have to be single-rank.
+  MIMOPlant::A_matrix_type test_A = MIMOPlant::A_matrix_type::Random();
+  MIMOPlant::B_matrix_type test_B = MIMOPlant::B_matrix_type::Random();
+
+  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant plant(x_initial, test_A, test_B);
+
+  ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
+}
+
+TEST(AnalysisTest, MIMOUncontrollableTest) {
+  constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
+  using MIMOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  MIMOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 1, 0 /*]*/,
+      /*[*/ 0, 1 /*]]*/;
+  MIMOPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 1, 2 /*]*/,
+      /*[*/ 2, 4 /*]]*/;
+
+  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant plant(x_initial, test_A, test_B);
+
+  ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
+}
+
 TEST(PlantTest, PropagateDiscreteDynamics) {
-  // this test was inspired by example 2 in EECS16B lecture 8A, spring 2020
-  // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =

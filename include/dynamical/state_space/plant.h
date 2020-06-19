@@ -12,7 +12,6 @@ class Plant {
   using B_matrix_type = Eigen::Matrix<Scalar, state_dim, input_dim>;
   using C_matrix_type = Eigen::Matrix<Scalar, output_dim, state_dim>;
   using D_matrix_type = Eigen::Matrix<Scalar, output_dim, input_dim>;
-
   using x_vector_type = Eigen::Matrix<Scalar, state_dim, 1>;
   using y_vector_type = Eigen::Matrix<Scalar, output_dim, 1>;
   using u_vector_type = Eigen::Matrix<Scalar, input_dim, 1>;
@@ -62,6 +61,8 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
 
 namespace analysis {
 
+// TODO: move function implementations to source files? or move this entire
+// analysis block to another file?
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 auto get_controllability_matrix(
     const dynamical::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
@@ -81,6 +82,18 @@ auto get_controllability_matrix(
 
   return controllability_matrix;
 }
+
+// TODO: check the numerical robustness of this?
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_controllable(Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+  auto controllability_matrix = get_controllability_matrix(plant);
+  Eigen::ColPivHouseholderQR<decltype(controllability_matrix)> qr_decomp(
+      controllability_matrix);
+  auto rank = qr_decomp.rank();
+  return rank >= state_dim;
+}
+
+// TODO: observability calculation and checker?
 
 }  // namespace analysis
 }  // namespace dynamical
