@@ -44,13 +44,70 @@ TEST(PlantTest, DefaultArgumentCheck) {
   ASSERT_EQ(SimplePlant::D_matrix_type::Zero(), plant.D_);
 }
 
-TEST(PlantTest, PropagateDiscreteDynamics) {
-  // this test is based on example 2 in EECS16B lecture 8A, spring 2020
+TEST(AnalysisTest, SISOControllabilityMatrix) {
+  // TODO: parameterize controllability matrix test?
+
+  // this test was inspired by example 2 in EECS16B lecture 8A, spring 2020
   // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_states>;
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  SISOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 1, 1 /*]*/,
+      /*[*/ 0, 2 /*]]*/;
+  SISOPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 0 /*]*/,
+      /*[*/ 1 /*]]*/;
+
+  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant plant(x_initial, test_A, test_B);
+
+  Eigen::MatrixXd calculated_controllability_matrix =
+      dynamical::analysis::get_controllability_matrix(plant);
+
+  Eigen::MatrixXd manual_controllability_matrix(2, 2);
+  manual_controllability_matrix << /*[[*/ 0, 1 /*]*/,
+      /*[*/ 1, 2 /*]]*/;
+
+  ASSERT_TRUE(test_utils::check_matrix_equality(
+      manual_controllability_matrix, calculated_controllability_matrix));
+}
+
+TEST(AnalysisTest, MIMOControllabilityMatrix) {
+  constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
+  using MIMOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+
+  MIMOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 1, 1 /*]*/,
+      /*[*/ 0, 2 /*]]*/;
+  MIMOPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 0, 1 /*]*/,
+      /*[*/ 1, 1 /*]]*/;
+
+  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant plant(x_initial, test_A, test_B);
+
+  Eigen::MatrixXd calculated_controllability_matrix =
+      dynamical::analysis::get_controllability_matrix(plant);
+
+  Eigen::MatrixXd manual_controllability_matrix(2, 4);
+  manual_controllability_matrix << /*[[*/ 0, 1, 1, 2 /*]*/,
+      /*[*/ 1, 1, 2, 2 /*]]*/;
+
+  ASSERT_TRUE(test_utils::check_matrix_equality(
+      manual_controllability_matrix, calculated_controllability_matrix));
+}
+
+TEST(PlantTest, PropagateDiscreteDynamics) {
+  // this test was inspired by example 2 in EECS16B lecture 8A, spring 2020
+  // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
+  using SISOPlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   // explicitly define A and B matrices for system that we know is controllable
   SISOPlant::A_matrix_type test_A;
@@ -59,30 +116,33 @@ TEST(PlantTest, PropagateDiscreteDynamics) {
   SISOPlant::B_matrix_type test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
-  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
-  SISOPlant plant(x_initial, test_A, test_B);
 
-  SISOPlant::x_vector_type x_target = SISOPlant::x_vector_type::Random();
-  Eigen::Matrix2d controllability_matrix =
-      dynamical::analysis::get_controllability_matrix(plant);
+  // test a couple of random initial state / target state pairs
+  for (int i = 0; i != 5; ++i) {
+    SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+    SISOPlant plant(x_initial, test_A, test_B);
 
-  // calculate a two-step input sequence that should get us to the target state
-  Eigen::Vector2d inverted_input_sequence =
-      controllability_matrix.inverse() *
-      (x_target - (plant.A_ * plant.A_ * x_initial));
+    SISOPlant::x_vector_type x_target = SISOPlant::x_vector_type::Random();
+    Eigen::MatrixXd controllability_matrix =
+        dynamical::analysis::get_controllability_matrix(plant);
 
-  ASSERT_TRUE(test_utils::check_matrix_equality(x_initial, plant.GetX()));
-  plant.Update(inverted_input_sequence.row(1));
-  plant.Update(inverted_input_sequence.row(0));
-  ASSERT_TRUE(test_utils::check_matrix_equality(x_target, plant.GetX()));
+    // calculate a two-step input sequence that should reach the target state
+    Eigen::Vector2d inverted_input_sequence =
+        controllability_matrix.inverse() *
+        (x_target - (plant.A_ * plant.A_ * x_initial));
 
-  // std::cout << "\nX Initial: \n" << x_initial << "\n\n";
-  // std::cout << "\nX Target: \n" << x_target << "\n\n";
-  // std::cout << "\nControllability: \n" << controllability_matrix << '\n';
-  // std::cout << "\nInputSequence: \n" << inverted_input_sequence << '\n';
-  // std::cout << "\nX Actual: \n" << plant.GetX() << '\n';
+    ASSERT_TRUE(test_utils::check_matrix_equality(x_initial, plant.GetX()));
+    plant.Update(inverted_input_sequence.row(1));
+    plant.Update(inverted_input_sequence.row(0));
+    ASSERT_TRUE(test_utils::check_matrix_equality(x_target, plant.GetX()));
+
+    // std::cout << "Test #" << i << " ===========\n";
+    // std::cout << "\nX Initial: \n" << x_initial << '\n';
+    // std::cout << "\nX Target: \n" << x_target << '\n';
+    // std::cout << "\nControllability: \n" << controllability_matrix << '\n';
+    // std::cout << "\nInput Sequence: \n" << inverted_input_sequence << '\n';
+    // std::cout << "\nX Actual: \n" << plant.GetX() << "\n\n";
+  }
 }
-
-// TODO: more complete testing of controllability matrix
 
 }  // namespace testing

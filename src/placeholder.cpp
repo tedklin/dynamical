@@ -1,1 +1,1 @@
-#include "Eigen/Eigen"
+#include "Eigen/Dense"
