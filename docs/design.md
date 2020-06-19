@@ -5,7 +5,7 @@ This document is intended to lay out the nontrivial software design decisions an
 
 ## state_space
 
-### Plant.h
+### plant.h
 - Plant abstract template 
     - access control
         - public using declarations
