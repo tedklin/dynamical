@@ -3,7 +3,6 @@
 #include "dynamical/math/integration.h"
 
 #include <cmath>
-#include <stdexcept>
 
 #include "Eigen/Dense"
 

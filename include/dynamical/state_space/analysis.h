@@ -4,14 +4,14 @@
 
 #include <cmath>
 #include <iostream>  // TODO: take iostream out after debugging
+#include <stdexcept>
 
 namespace dynamical {
 namespace analysis {
 
-// TODO: eigen doesn't play well with auto, ensure this works!
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-auto get_controllability_matrix(
-    const dynamical::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
+Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant,
     int num_steps_allowed = state_dim) {
   Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix(
       state_dim, (num_steps_allowed * input_dim));
@@ -25,15 +25,16 @@ auto get_controllability_matrix(
     }
     step_block = plant.A_ * step_block;
   }
-
   return controllability_matrix;
 }
 
 // TODO: eigen doesn't play well with auto, ensure this works!
 // TODO: check the numerical robustness of this?
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_controllable(Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
-  auto controllability_matrix = get_controllability_matrix(plant);
+bool is_controllable(
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix =
+      get_controllability_matrix(plant);
   Eigen::ColPivHouseholderQR<decltype(controllability_matrix)> qr_decomp(
       controllability_matrix);
   auto rank = qr_decomp.rank();
@@ -46,9 +47,9 @@ bool is_controllable(Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
 // the returned discrete model has complex Scalar type std::complex<double>
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-dynamical::DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
-discretize(const dynamical::ContinuousPlant<state_dim, input_dim, output_dim,
-                                            Scalar>& continuous_plant,
+DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
+discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+               continuous_plant,
            double dt) {
   Eigen::EigenSolver<Eigen::Matrix<Scalar, state_dim, state_dim>> eigensolver(
       continuous_plant.A_);
@@ -56,8 +57,8 @@ discretize(const dynamical::ContinuousPlant<state_dim, input_dim, output_dim,
       eigensolver.eigenvectors();
 
   decltype(A_eigenbasis) A_eigenbasis_inverse;
-  bool A_eigenbasis_invertible;
-  // eigen-3.3.7 (faster)
+  // // eigen-3.3.7 (more efficient?)
+  // bool A_eigenbasis_invertible;
   // A_eigenbasis.computeInverseWithCheck(A_eigenbasis_inverse,
   //                                      A_eigenbasis_invertible);
   // if (!A_eigenbasis_invertible) {
@@ -94,8 +95,7 @@ discretize(const dynamical::ContinuousPlant<state_dim, input_dim, output_dim,
       A_eigenbasis * particular_sol * A_eigenbasis_inverse *
       continuous_plant.B_;
 
-  dynamical::DiscretePlant<state_dim, input_dim, output_dim,
-                           std::complex<double>>
+  DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
       discretized_plant(continuous_plant.GetX(), A_discretized, B_discretized,
                         continuous_plant.C_, continuous_plant.D_);
 
