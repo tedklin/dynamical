@@ -99,9 +99,9 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
       discretized_plant(continuous_plant.GetX(), A_discretized, B_discretized,
                         continuous_plant.C_, continuous_plant.D_);
 
-  std::cout << A_eigenbasis << "\n\n";
-  std::cout << A_eigenbasis_inverse << "\n\n";
-  std::cout << A_eigenvalues << "\n\n";
+  // std::cout << A_eigenbasis << "\n\n";
+  // std::cout << A_eigenbasis_inverse << "\n\n";
+  // std::cout << A_eigenvalues << "\n\n";
 
   return discretized_plant;
 }

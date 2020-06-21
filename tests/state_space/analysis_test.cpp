@@ -3,6 +3,7 @@
 #include "dynamical/state_space/plant.h"
 #include "dynamical/test_utils.h"
 
+#include <cmath>
 #include <iostream>
 
 #include "Eigen/Dense"
@@ -140,26 +141,45 @@ TEST(AnalysisTest, UncontrollableMIMO) {
 }
 
 TEST(AnalysisTest, DiscretizationSISO) {
+  // example 1: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
-  using SISOContinuousPlant =
+  using ContinuousSISOPlant =
       dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
-  using SISODiscretePlant =
+  using DiscreteSISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  SISOContinuousPlant::A_matrix_type test_A;
-  test_A << /*[[*/ 0, 1 /*]*/,
-      /*[*/ -2, -3 /*]]*/;
-  SISOContinuousPlant::B_matrix_type test_B;
+  // ContinuousSISOPlant::A_matrix_type test_A;
+  // test_A << /*[[*/ 0, 1 /*]*/,
+  //     /*[*/ -2, -3 /*]]*/;
+  // ContinuousSISOPlant::B_matrix_type test_B;
+  // test_B << /*[[*/ 0 /*]*/,
+  //     /*[*/ 2 /*]]*/;
+
+  ContinuousSISOPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 0, -1 /*]*/,
+      /*[*/ 1, 0 /*]]*/;
+  ContinuousSISOPlant::B_matrix_type test_B;
   test_B << /*[[*/ 0 /*]*/,
-      /*[*/ 2 /*]]*/;
+      /*[*/ 1 /*]]*/;
 
-  SISOContinuousPlant::x_vector_type x_initial =
-      SISOContinuousPlant::x_vector_type::Random();
-  SISOContinuousPlant continuous_plant(x_initial, test_A, test_B);
+  ContinuousSISOPlant::x_vector_type x_initial =
+      ContinuousSISOPlant::x_vector_type::Random();
+  ContinuousSISOPlant continuous_plant(x_initial, test_A, test_B);
 
-  SISODiscretePlant discrete_plant =
-      dynamical::analysis::discretize(continuous_plant, 0.1);
+  // make sure it works for different values of dt
+  for (double dt = 2; dt > 0.001; dt /= 2) {
+    DiscreteSISOPlant discrete_plant =
+        dynamical::analysis::discretize(continuous_plant, dt);
+
+    DiscreteSISOPlant::A_matrix_type expected_A;
+    expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
+        /*[*/ std::sin(dt), std::cos(dt) /*]]*/;
+
+    ASSERT_TRUE(test_utils::check_complex_matrix_equality(expected_A,
+                                                          discrete_plant.A_));
+  }
 }
 
 }  // namespace testing
