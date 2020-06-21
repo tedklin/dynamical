@@ -55,16 +55,23 @@ discretize(const dynamical::ContinuousPlant<state_dim, input_dim, output_dim,
   Eigen::Matrix<std::complex<double>, state_dim, state_dim> A_eigenbasis =
       eigensolver.eigenvectors();
 
-  // decltype(A_eigenbasis) A_eigenbasis_inverse; // fails on eigen3.3.4
-  Eigen::Matrix<std::complex<double>, state_dim, state_dim>
-      A_eigenbasis_inverse;
+  decltype(A_eigenbasis) A_eigenbasis_inverse;
   bool A_eigenbasis_invertible;
-  A_eigenbasis.computeInverseWithCheck(A_eigenbasis_inverse,
-                                       A_eigenbasis_invertible);
-  if (!A_eigenbasis_invertible) {
+  // eigen-3.3.7 (faster)
+  // A_eigenbasis.computeInverseWithCheck(A_eigenbasis_inverse,
+  //                                      A_eigenbasis_invertible);
+  // if (!A_eigenbasis_invertible) {
+  //   throw std::runtime_error(
+  //       "(dynamical) Discretization error: eigenbasis not invertible.");
+  // }
+
+  // eigen-3.3.4 (default installation with apt)
+  Eigen::FullPivLU<decltype(A_eigenbasis)> lu(A_eigenbasis);
+  if (!lu.isInvertible()) {
     throw std::runtime_error(
         "(dynamical) Discretization error: eigenbasis not invertible.");
   }
+  A_eigenbasis_inverse = A_eigenbasis.inverse();
 
   Eigen::Matrix<std::complex<double>, state_dim, 1> A_eigenvalues =
       eigensolver.eigenvalues();
