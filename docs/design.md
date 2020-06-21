@@ -45,7 +45,6 @@ This document is intended to lay out nontrivial software design decisions and no
             - Having default arguments for C and D matrices adapts to all of the above situations.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
-                - It should also be noted that this breaks the good practice of ordering constructor parameters in the same order the respective member variables are declared in the class definition. I didn't want to go through repeated access specifiers (switching from public to protected and back to public). The parameters aren't interdependent, so it shouldn't matter in an egregious way.
 
 *DiscretePlant*
 - *namespace dynamical*

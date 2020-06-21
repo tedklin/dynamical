@@ -30,4 +30,5 @@ endmacro()
 
 
 package_add_test(plant_test state_space/plant_test.cpp)
+package_add_test(integration_test math/integration_test.cpp)
 # ^ ADD NEW TESTS HERE

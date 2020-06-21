@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Eigen/Dense"
+#include "dynamical/math/integration.h"
 
 namespace dynamical {
 
@@ -26,19 +27,20 @@ class Plant {
 
   virtual ~Plant() = default;
 
-  const A_matrix_type A_;
-  const B_matrix_type B_;
-  const C_matrix_type C_;
-  const D_matrix_type D_;
-
-  const x_vector_type& GetX() const { return x_; }
-  const y_vector_type& GetY() const { return y_; }
+  virtual void Update(const u_vector_type& u) = 0;
 
   void SetXInitial(const x_vector_type& initial_x) { x_initial_ = initial_x; }
 
   void ResetToXInitial() { x_ = x_initial_; }
 
-  virtual void Update(const u_vector_type& u) = 0;
+  const x_vector_type& GetX() const { return x_; }
+
+  const y_vector_type& GetY() const { return y_; }
+
+  const A_matrix_type A_;
+  const B_matrix_type B_;
+  const C_matrix_type C_;
+  const D_matrix_type D_;
 
  protected:
   x_vector_type x_initial_ = x_vector_type::Zero();
@@ -53,16 +55,39 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using Plant<state_dim, input_dim, output_dim, Scalar>::Plant;
 
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_vector_type;
+
   void Update(const u_vector_type& u) override {
     this->x_ = this->A_ * this->x_ + this->B_ * u;
     this->y_ = this->C_ * this->x_ + this->D_ * u;
   }
 };
 
+template <int state_dim, int input_dim, int output_dim = state_dim,
+          typename Scalar = double>
+class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
+ public:
+  using Plant<state_dim, input_dim, output_dim, Scalar>::Plant;
+
+  using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_vector_type;
+  using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_vector_type;
+
+  void Update(const u_vector_type& u) override {}
+
+  void UpdateSim(const u_vector_type& u, double dt) {
+    // TODO: test this against discretized model?
+    // https://en.cppreference.com/w/cpp/language/lambda#Lambda_capture
+    this->x_ = numerical::integration::rk4(
+        [&](const x_vector_type& x) -> x_vector_type {
+          return this->A_ * x + this->B_ * u;
+        },
+        this->x_, dt);
+
+    this->y_ = this->C_ * this->x_ + this->D_ * u;
+  }
+};
+
 namespace analysis {
 
-// TODO: move function implementations to source files? or move this entire
-// analysis block to another file?
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 auto get_controllability_matrix(
     const dynamical::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
@@ -93,7 +118,7 @@ bool is_controllable(Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
   return rank >= state_dim;
 }
 
-// TODO: observability calculation and checker?
+// TODO: get_observability_matrix and check_observability?
 
 }  // namespace analysis
 }  // namespace dynamical

@@ -1,5 +1,5 @@
 #include "dynamical/state_space/plant.h"
-#include "dynamical/tests/test_utils.h"
+#include "dynamical/test_utils.h"
 
 #include <cmath>
 #include <iostream>
@@ -10,7 +10,7 @@
 namespace testing {
 
 TEST(PlantTest, DimensionCheck) {
-  constexpr int num_states = 3, num_inputs = 1, num_outputs = num_states;
+  constexpr int num_states = 3, num_inputs = 2, num_outputs = num_states;
   using SimplePlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs, double>;
   SimplePlant plant(SimplePlant::x_vector_type::Random(),
@@ -34,7 +34,7 @@ TEST(PlantTest, DimensionCheck) {
 }
 
 TEST(PlantTest, DefaultArgumentCheck) {
-  constexpr int num_states = 3, num_inputs = 1;  // num_outputs = num_states
+  constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
   using SimplePlant = dynamical::DiscretePlant<num_states, num_inputs>;
   SimplePlant plant(SimplePlant::x_vector_type::Random(),
                     SimplePlant::A_matrix_type::Random(),
