@@ -29,11 +29,12 @@ bool check_matrix_equality(Eigen::MatrixXd expected, Eigen::MatrixXd actual,
   return true;
 }
 
-// TODO: why can't we overload this?
+// TODO: can we overload this?
 bool check_complex_matrix_equality(Eigen::MatrixXcd expected,
                                    Eigen::MatrixXcd actual,
                                    double tolerance = 1e-5) {
   if (expected.rows() != actual.rows() || expected.cols() != actual.cols()) {
+    // TODO: make into exception?
     std::cout
         << "Error: tried to compare matrices of different dimensions!\n\n";
     return false;

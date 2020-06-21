@@ -140,45 +140,79 @@ TEST(AnalysisTest, UncontrollableMIMO) {
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
 }
 
-TEST(AnalysisTest, DiscretizationSISO) {
+TEST(AnalysisTest, DiscretizationSimple) {
   // example 1: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
-  using ContinuousSISOPlant =
+  using ContinuousPlant =
       dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
-  using DiscreteSISOPlant =
+  using DiscretePlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  // ContinuousSISOPlant::A_matrix_type test_A;
+  // ContinuousPlant::A_matrix_type test_A;
   // test_A << /*[[*/ 0, 1 /*]*/,
   //     /*[*/ -2, -3 /*]]*/;
-  // ContinuousSISOPlant::B_matrix_type test_B;
+  // ContinuousPlant::B_matrix_type test_B;
   // test_B << /*[[*/ 0 /*]*/,
   //     /*[*/ 2 /*]]*/;
 
-  ContinuousSISOPlant::A_matrix_type test_A;
+  ContinuousPlant::A_matrix_type test_A;
   test_A << /*[[*/ 0, -1 /*]*/,
       /*[*/ 1, 0 /*]]*/;
-  ContinuousSISOPlant::B_matrix_type test_B;
+  ContinuousPlant::B_matrix_type test_B;
   test_B << /*[[*/ 0 /*]*/,
-      /*[*/ 1 /*]]*/;
+      /*[*/ 0 /*]]*/;
 
-  ContinuousSISOPlant::x_vector_type x_initial =
-      ContinuousSISOPlant::x_vector_type::Random();
-  ContinuousSISOPlant continuous_plant(x_initial, test_A, test_B);
+  ContinuousPlant::x_vector_type x_initial =
+      ContinuousPlant::x_vector_type::Random();
+  ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
   // make sure it works for different values of dt
   for (double dt = 2; dt > 0.001; dt /= 2) {
-    DiscreteSISOPlant discrete_plant =
+    DiscretePlant discrete_plant =
         dynamical::analysis::discretize(continuous_plant, dt);
 
-    DiscreteSISOPlant::A_matrix_type expected_A;
+    DiscretePlant::A_matrix_type expected_A;
     expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
         /*[*/ std::sin(dt), std::cos(dt) /*]]*/;
 
     ASSERT_TRUE(test_utils::check_complex_matrix_equality(expected_A,
                                                           discrete_plant.A_));
+  }
+}
+
+TEST(AnalysisTest, DiscretizationSimpleFuzz) {
+  // this test takes advantage of the fact that eigenvalues of a continuous
+  // system end up in the exponent of its discretized version.
+
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
+  using ContinuousPlant =
+      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+  using DiscretePlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
+                               std::complex<double>>;
+
+  for (int fuzz_index = 0; fuzz_index != 20; ++fuzz_index) {
+    ContinuousPlant::A_matrix_type test_A =
+        ContinuousPlant::A_matrix_type::Random();
+    ContinuousPlant::B_matrix_type test_B =
+        ContinuousPlant::B_matrix_type::Zero();
+    ContinuousPlant::x_vector_type x_initial =
+        ContinuousPlant::x_vector_type::Random();
+
+    ContinuousPlant continuous_plant(x_initial, test_A, test_B);
+    ContinuousPlant continuous_plant_doubled(x_initial, test_A * 2, test_B);
+
+    for (double dt = 2; dt > 0.001; dt /= 2) {
+      DiscretePlant discrete_plant =
+          dynamical::analysis::discretize(continuous_plant, dt);
+      DiscretePlant discrete_plant_doubled =
+          dynamical::analysis::discretize(continuous_plant_doubled, dt);
+
+      ASSERT_TRUE(test_utils::check_complex_matrix_equality(
+          discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_));
+    }
   }
 }
 
