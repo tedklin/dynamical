@@ -1,8 +1,8 @@
 #include "dynamical/state_space/plant.h"
+
 #include "dynamical/state_space/analysis.h"
 #include "dynamical/test_utils.h"
 
-#include <cmath>
 #include <iostream>
 
 #include "Eigen/Dense"

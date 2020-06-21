@@ -1,10 +1,11 @@
 #pragma once
 
+#include "dynamical/math/integration.h"
+
 #include <cmath>
 #include <stdexcept>
 
 #include "Eigen/Dense"
-#include "dynamical/math/integration.h"
 
 namespace dynamical {
 
