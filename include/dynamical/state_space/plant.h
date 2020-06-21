@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cmath>
+#include <stdexcept>
+
 #include "Eigen/Dense"
 #include "dynamical/math/integration.h"
 
@@ -119,6 +122,50 @@ bool is_controllable(Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
 }
 
 // TODO: get_observability_matrix and check_observability?
+
+// discretization by diagonalization
+// https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+dynamical::DiscretePlant<state_dim, input_dim, output_dim, Scalar> discretize(
+    const dynamical::ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+        continuous_plant,
+    double dt) {
+  Eigen::EigenSolver<A_matrix_type> eigensolver(continuous_plant.A_);
+  auto A_eigenbasis = eigensolver.eigenvectors();
+  decltype(A_eigenbasis) A_eigenbasis_inverse;
+  bool A_eigenbasis_invertible;
+  A_eigenbasis.computeInverseWithCheck(A_eigenbasis_inverse,
+                                       A_eigenbasis_invertible);
+  if (!A_eigenbasis_invertible) {
+    throw std::runtime_error(
+        "(dynamical) Discretization error: eigenbasis not invertible.");
+  }
+
+  auto A_eigenvalues = eigensolver.eigenvalues();
+  decltype(A_eigenbasis) homogeneous_sol = A_matrix_type::Zero();
+  decltype(A_eigenbasis) particular_sol = A_matrix_type::Zero();
+  for (unsigned row = 0; row != A_eigenvalues_.rows(); ++row) {
+    auto eigenvalue = A_eigenvalues(row, 0);
+    homogeneous_sol(row, row) = std::exp(eigenvalue * dt);
+    if (eigenvalue == 0) {
+      particular_sol(row, row) = dt;
+    } else {
+      particular_sol(row, row) = (std::exp(eigenvalue * dt) - 1) / eigenvalue;
+    }
+  }
+
+  decltype(continuous_plant.A_) A_discretized =
+      A_eigenbasis * homogeneous_sol * A_eigenbasis_inverse;
+  decltype(continuous_plant.B_) B_discretized = A_eigenbasis * particular_sol *
+                                                A_eigenbasis_inverse *
+                                                continuous_plant.B_;
+
+  dynamical::DiscretePlant<state_dim, input_dim, output_dim, Scalar>
+      discretized_plant(continuous_plant.GetX(), A_discretized, B_discretized,
+                        continuous_plant.C_, continuous_plant.D_);
+
+  return discretized_plant;
+}
 
 }  // namespace analysis
 }  // namespace dynamical
