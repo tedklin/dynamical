@@ -52,6 +52,8 @@ This document is intended to lay out nontrivial software design decisions and no
 - The using declaration lets us inherit all non copy-control constructors directly from Plant.
 - Inheritance can be a little bit tricky with templates, see quick explanation [here](https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members) for why we need an explicit *this->* and typename declarations.
 
+### analysis.h
+
 *get_controllability_matrix*
 - *namespace dynamical::analysis*
 - *type: template function*
