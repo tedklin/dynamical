@@ -1,8 +1,6 @@
 # Design document
 
-This document is intended to lay out nontrivial software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind somewhat-significant design decisions made, for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about the nature of control system design.
-
-**This (admittedly pedantic) document is not geared towards user documentation purposes and shouldn't be used as such.**
+This document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design.
 
 ## Some driving design goals
 
@@ -59,7 +57,7 @@ This document is intended to lay out nontrivial software design decisions and no
 ### analysis.h
 
 overall notes
-    - The Eigen library doesn't play well with *auto* type deduction, so I spelt out matrix types even where using *auto* would make sense. A small tradeoff between verbosity and guaranteed correctness.
+    - The Eigen library doesn't play well with *auto* type deduction, so I spelt out matrix types even where using *auto* would make sense. This resulted in better-guaranteed correctness at the expense of verbosity/readability.
 
 *get_controllability_matrix*
 - *namespace dynamical::analysis*

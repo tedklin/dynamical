@@ -28,7 +28,6 @@ Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
   return controllability_matrix;
 }
 
-// TODO: eigen doesn't play well with auto, ensure this works!
 // TODO: check the numerical robustness of this?
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_controllable(
@@ -79,9 +78,9 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
   decltype(A_eigenbasis) homogeneous_sol = decltype(A_eigenbasis)::Zero();
   decltype(A_eigenbasis) particular_sol = decltype(A_eigenbasis)::Zero();
   for (unsigned index = 0; index != A_eigenvalues.rows(); ++index) {
-    auto eigenvalue = A_eigenvalues(index, 0);
+    std::complex<double> eigenvalue = A_eigenvalues(index, 0);
     homogeneous_sol(index, index) = std::exp(eigenvalue * dt);
-    if (std::abs(eigenvalue) < 1e-9) {
+    if (std::abs(eigenvalue) == 0) {
       particular_sol(index, index) = dt;
     } else {
       particular_sol(index, index) =

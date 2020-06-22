@@ -150,13 +150,6 @@ TEST(AnalysisTest, DiscretizationSimple) {
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  // ContinuousPlant::A_matrix_type test_A;
-  // test_A << /*[[*/ 0, 1 /*]*/,
-  //     /*[*/ -2, -3 /*]]*/;
-  // ContinuousPlant::B_matrix_type test_B;
-  // test_B << /*[[*/ 0 /*]*/,
-  //     /*[*/ 2 /*]]*/;
-
   ContinuousPlant::A_matrix_type test_A;
   test_A << /*[[*/ 0, -1 /*]*/,
       /*[*/ 1, 0 /*]]*/;
@@ -214,6 +207,30 @@ TEST(AnalysisTest, DiscretizationSimpleFuzz) {
           discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_));
     }
   }
+}
+
+// TODO: finish implementing this and discretization MIMO test
+TEST(AnalysisTest, DiscretizationSISO) {
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
+  using ContinuousPlant =
+      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+  using DiscretePlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
+                               std::complex<double>>;
+
+  ContinuousPlant::A_matrix_type test_A;
+  test_A << /*[[*/ 0, 1 /*]*/,
+      /*[*/ -2, -3 /*]]*/;
+  ContinuousPlant::B_matrix_type test_B;
+  test_B << /*[[*/ 0 /*]*/,
+      /*[*/ 2 /*]]*/;
+
+  ContinuousPlant::x_vector_type x_initial =
+      ContinuousPlant::x_vector_type::Random();
+  ContinuousPlant continuous_plant(x_initial, test_A, test_B);
+
+  DiscretePlant discrete_plant =
+      dynamical::analysis::discretize(continuous_plant, 0.01);
 }
 
 }  // namespace testing
