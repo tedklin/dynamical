@@ -1,21 +1,21 @@
 # Design document
 
-This document is intended to lay out nontrivial software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind somewhat-significant design decisions made, for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about the nature of control system design. It also helps me maintain my own sanity as the project grows and I can't remember why I did certain things a certain way by just looking at the code.
+This document is intended to lay out nontrivial software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind somewhat-significant design decisions made, for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about the nature of control system design.
 
 **This (admittedly pedantic) document is not geared towards user documentation purposes and shouldn't be used as such.**
 
-## Driving design goals
+## Some driving design goals
 
 1. Safety
     - Minimize undefined behavior.
         - Force users to state what they want as explicitly as possible.
-    - Maintain const-correctness.
     - Every class and every function should do exactly what their names say.
+    - Maintain const-correctness.
+    - Tests! Lots of tests!
+    - ASan?
 2. Modularity and efficiency
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
-    - Generic algorithms!
-        - Inspired by numerous C++ libraries, including the one and only STL.
-        - Keep self-defined objects relatively "lightweight" without loss of functionality.
+    - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
 3. User-focused
     - Keep in mind the applications a library like this could be used for, and design around that.
 
@@ -28,7 +28,7 @@ This document is intended to lay out nontrivial software design decisions and no
 - access control
     - public using declarations for type names
         - Users can avoid errors in specifying the various dimensions of the system matrices.
-        - Users can easily create special matrices (through easy functions defined by Eigen) to pass in.
+        - Users can easily create special matrices (through functions defined by Eigen) of the correct type.
         - Eliminate the verbosity of declaring Eigen library fixed matrix types.
     - public constant A, B, C, D
         - Eliminate the need for trivial getters ([C.131](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#c131-avoid-trivial-getters-and-setters)).
@@ -68,3 +68,13 @@ overall notes
     - TODO: understand this better.
 - The current implementation returns the controllability matrix by value. This could be an expensive operation if the matrix is large. An alternative is returning by reference, but undefined behavior would result because the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function. Since this is a generic analysis function that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
     - TODO: explore alternate possibilities to avoid expensive copy operation while maintaining ease of use.
+
+*is_controllable*
+- *namespace dynamical::analysis*
+- *type: template function*
+
+*discretize*
+- *namespace dynamical::analysis*
+- *type: template function*
+- This function implements continuous-time plant discretization as taught in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/). 
+    - This method uses the eigenbasis (which isn't guaranteed to be real even if your matrix is real) for diagonalization. At first I tried to optimize for cases where the eigenbasis actually is real to avoid the overhead of *std::complex*, but it became a long struggle with the Eigen library's type deduction/conversion rules. I ended up just sticking with *std::complex< double >* for everything, so all DiscretePlant instances created by this function have a complex double Scalar type regardless of what ContinuousPlant is passed in.
