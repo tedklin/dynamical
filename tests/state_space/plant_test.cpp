@@ -14,11 +14,10 @@ TEST(PlantTest, DimensionCheck) {
   constexpr int num_states = 3, num_inputs = 2, num_outputs = num_states;
   using SimplePlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs, double>;
-  SimplePlant plant(SimplePlant::x_vector_type::Random(),
-                    SimplePlant::A_matrix_type::Random(),
-                    SimplePlant::B_matrix_type::Random(),
-                    SimplePlant::C_matrix_type::Random(),
-                    SimplePlant::D_matrix_type::Random());
+  SimplePlant plant(
+      SimplePlant::x_VectorType::Random(), SimplePlant::A_MatrixType::Random(),
+      SimplePlant::B_MatrixType::Random(), SimplePlant::C_MatrixType::Random(),
+      SimplePlant::D_MatrixType::Random());
 
   ASSERT_EQ(num_states, plant.GetX().rows());
   ASSERT_EQ(1, plant.GetX().cols());
@@ -37,12 +36,12 @@ TEST(PlantTest, DimensionCheck) {
 TEST(PlantTest, DefaultArgumentCheck) {
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
   using SimplePlant = dynamical::DiscretePlant<num_states, num_inputs>;
-  SimplePlant plant(SimplePlant::x_vector_type::Random(),
-                    SimplePlant::A_matrix_type::Random(),
-                    SimplePlant::B_matrix_type::Random());
+  SimplePlant plant(SimplePlant::x_VectorType::Random(),
+                    SimplePlant::A_MatrixType::Random(),
+                    SimplePlant::B_MatrixType::Random());
 
-  ASSERT_EQ(SimplePlant::C_matrix_type::Identity(), plant.C_);
-  ASSERT_EQ(SimplePlant::D_matrix_type::Zero(), plant.D_);
+  ASSERT_EQ(SimplePlant::C_MatrixType::Identity(), plant.C_);
+  ASSERT_EQ(SimplePlant::D_MatrixType::Zero(), plant.D_);
 }
 
 TEST(PlantTest, PropagateDiscreteDynamics) {
@@ -53,19 +52,19 @@ TEST(PlantTest, PropagateDiscreteDynamics) {
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   // explicitly define A and B matrices for system that we know is controllable
-  SISOPlant::A_matrix_type test_A;
+  SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
-  SISOPlant::B_matrix_type test_B;
+  SISOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
 
   // test a couple of random initial state / target state pairs
   for (int fuzz_index = 0; fuzz_index != 5; ++fuzz_index) {
-    SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+    SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
     SISOPlant plant(x_initial, test_A, test_B);
 
-    SISOPlant::x_vector_type x_target = SISOPlant::x_vector_type::Random();
+    SISOPlant::x_VectorType x_target = SISOPlant::x_VectorType::Random();
     Eigen::MatrixXd controllability_matrix =
         dynamical::analysis::get_controllability_matrix(plant);
 

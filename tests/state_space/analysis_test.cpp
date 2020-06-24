@@ -18,14 +18,14 @@ TEST(AnalysisTest, ControllabilityMatrixSISO) {
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  SISOPlant::A_matrix_type test_A;
+  SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
-  SISOPlant::B_matrix_type test_B;
+  SISOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
 
-  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
   SISOPlant plant(x_initial, test_A, test_B);
 
   Eigen::MatrixXd calculated_controllability_matrix =
@@ -44,14 +44,14 @@ TEST(AnalysisTest, ControllabilityMatrixMIMO) {
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  MIMOPlant::A_matrix_type test_A;
+  MIMOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
-  MIMOPlant::B_matrix_type test_B;
+  MIMOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0, 1 /*]*/,
       /*[*/ 1, 1 /*]]*/;
 
-  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant::x_VectorType x_initial = MIMOPlant::x_VectorType::Random();
   MIMOPlant plant(x_initial, test_A, test_B);
 
   Eigen::MatrixXd calculated_controllability_matrix =
@@ -72,14 +72,14 @@ TEST(AnalysisTest, ControllableSISO) {
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  SISOPlant::A_matrix_type test_A;
+  SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
-  SISOPlant::B_matrix_type test_B;
+  SISOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
 
-  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
   SISOPlant plant(x_initial, test_A, test_B);
 
   ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
@@ -92,14 +92,14 @@ TEST(AnalysisTest, UncontrollableSISO) {
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  SISOPlant::A_matrix_type test_A;
+  SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
-  SISOPlant::B_matrix_type test_B;
+  SISOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 1 /*]*/,
       /*[*/ 0 /*]]*/;
 
-  SISOPlant::x_vector_type x_initial = SISOPlant::x_vector_type::Random();
+  SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
   SISOPlant plant(x_initial, test_A, test_B);
 
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
@@ -113,10 +113,10 @@ TEST(AnalysisTest, ControllableMIMO) {
   // the probability of getting a random uncontrollable plant with the two
   // states and two inputs should be very small. one matrix would have to be
   // something like the identity, and the other would have to be single-rank.
-  MIMOPlant::A_matrix_type test_A = MIMOPlant::A_matrix_type::Random();
-  MIMOPlant::B_matrix_type test_B = MIMOPlant::B_matrix_type::Random();
+  MIMOPlant::A_MatrixType test_A = MIMOPlant::A_MatrixType::Random();
+  MIMOPlant::B_MatrixType test_B = MIMOPlant::B_MatrixType::Random();
 
-  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant::x_VectorType x_initial = MIMOPlant::x_VectorType::Random();
   MIMOPlant plant(x_initial, test_A, test_B);
 
   ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
@@ -127,14 +127,14 @@ TEST(AnalysisTest, UncontrollableMIMO) {
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  MIMOPlant::A_matrix_type test_A;
+  MIMOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 0 /*]*/,
       /*[*/ 0, 1 /*]]*/;
-  MIMOPlant::B_matrix_type test_B;
+  MIMOPlant::B_MatrixType test_B;
   test_B << /*[[*/ 1, 2 /*]*/,
       /*[*/ 2, 4 /*]]*/;
 
-  MIMOPlant::x_vector_type x_initial = MIMOPlant::x_vector_type::Random();
+  MIMOPlant::x_VectorType x_initial = MIMOPlant::x_VectorType::Random();
   MIMOPlant plant(x_initial, test_A, test_B);
 
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
@@ -150,15 +150,15 @@ TEST(AnalysisTest, DiscretizationSimple) {
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  ContinuousPlant::A_matrix_type test_A;
+  ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, -1 /*]*/,
       /*[*/ 1, 0 /*]]*/;
-  ContinuousPlant::B_matrix_type test_B;
+  ContinuousPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 0 /*]]*/;
 
-  ContinuousPlant::x_vector_type x_initial =
-      ContinuousPlant::x_vector_type::Random();
+  ContinuousPlant::x_VectorType x_initial =
+      ContinuousPlant::x_VectorType::Random();
   ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
   // make sure it works for different values of dt
@@ -166,7 +166,7 @@ TEST(AnalysisTest, DiscretizationSimple) {
     DiscretePlant discrete_plant =
         dynamical::analysis::discretize(continuous_plant, dt);
 
-    DiscretePlant::A_matrix_type expected_A;
+    DiscretePlant::A_MatrixType expected_A;
     expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
         /*[*/ std::sin(dt), std::cos(dt) /*]]*/;
 
@@ -187,12 +187,12 @@ TEST(AnalysisTest, DiscretizationSimpleFuzz) {
                                std::complex<double>>;
 
   for (int fuzz_index = 0; fuzz_index != 20; ++fuzz_index) {
-    ContinuousPlant::A_matrix_type test_A =
-        ContinuousPlant::A_matrix_type::Random();
-    ContinuousPlant::B_matrix_type test_B =
-        ContinuousPlant::B_matrix_type::Zero();
-    ContinuousPlant::x_vector_type x_initial =
-        ContinuousPlant::x_vector_type::Random();
+    ContinuousPlant::A_MatrixType test_A =
+        ContinuousPlant::A_MatrixType::Random();
+    ContinuousPlant::B_MatrixType test_B =
+        ContinuousPlant::B_MatrixType::Zero();
+    ContinuousPlant::x_VectorType x_initial =
+        ContinuousPlant::x_VectorType::Random();
 
     ContinuousPlant continuous_plant(x_initial, test_A, test_B);
     ContinuousPlant continuous_plant_doubled(x_initial, test_A * 2, test_B);
@@ -218,15 +218,15 @@ TEST(AnalysisTest, DiscretizationSISO) {
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  ContinuousPlant::A_matrix_type test_A;
+  ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1 /*]*/,
       /*[*/ -2, -3 /*]]*/;
-  ContinuousPlant::B_matrix_type test_B;
+  ContinuousPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 2 /*]]*/;
 
-  ContinuousPlant::x_vector_type x_initial =
-      ContinuousPlant::x_vector_type::Random();
+  ContinuousPlant::x_VectorType x_initial =
+      ContinuousPlant::x_VectorType::Random();
   ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
   DiscretePlant discrete_plant =
