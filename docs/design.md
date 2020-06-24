@@ -1,20 +1,24 @@
 # Design document
 
-This document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design.
+This document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design, so it's admittedly pretty pedantic.
 
 ## Some driving design goals
 
-1. Safety
+1. User-safety
     - Minimize undefined behavior.
-        - Force users to state what they want as explicitly as possible.
+    - Force users to state what they want as explicitly as possible.
     - Every class and every function should do exactly what their names say.
     - Maintain const-correctness.
     - Tests! Lots of tests!
-    - ASan?
-2. Modularity and efficiency
+2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
+        - i.e. each block type in a typical control system diagram should be its own class.
+3. Efficiency
+    - Optimizations like enabling move operations where it makes sense.
     - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
-3. User-focused
+        - don't really know if this actually increases performance in any way but it also keeps class definitions more readable.
+    - Learn how to use tools like sanitizers and profilers. 
+4. Application-focused
     - Keep in mind the applications a library like this could be used for, and design around that.
 
 ## state_space
@@ -29,20 +33,21 @@ This document is intended to lay out software design decisions and non-obvious c
         - Users can easily create special matrices (through functions defined by Eigen) of the correct type.
         - Eliminate the verbosity of declaring Eigen library fixed matrix types.
     - public constant A, B, C, D
-        - Eliminate the need for trivial getters ([C.131](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#c131-avoid-trivial-getters-and-setters)).
+        - Eliminate the need for trivial getters ([C.131](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#c131-avoid-trivial-getters-and-setters)). It doesn't make sense for the system dynamics of a plant to be modified after initialization.
     - protected state and output
-        - Encapsulation for safety.
+        - Standard encapsulation.
 - constructor
     - deleted default constructor
         - In general, it doesn't make sense to create a Plant without any dynamics.
         - Note that if users do need to create a Plant without any dynamics, they can still do so explicitly.
-    - only one defined constructor, with default arguments for the C and D matrices
+    - one defined constructor, with default arguments for the C and D matrices and the initial state vector as the first argument.
         - I don't have much experience with implementation of state-space controllers in practice, so I don't really know if this was the best decision. The considerations I took for the design of the constructor(s) for this class are as follows:
             - In my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
-            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicit C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). On the other hand, I haven't seen as strong of a need for the D matrix, so D might be safe to ignore in many cases.
-            - Having default arguments for C and D matrices adapts to all of the above situations.
+            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicit C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). On the other hand, I haven't seen as strong of a need for the D matrix (and it seems like it would save on computation), so D might be safe to ignore in many cases.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
+    - no explicitly defined copy-control.
+        - Rule of Zero.
 
 *DiscretePlant*
 - *namespace dynamical*
@@ -57,15 +62,18 @@ This document is intended to lay out software design decisions and non-obvious c
 ### analysis.h
 
 overall notes
-    - The Eigen library doesn't play well with *auto* type deduction, so I spelt out matrix types even where using *auto* would make sense. This resulted in better-guaranteed correctness at the expense of verbosity/readability.
+    - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This resulted in better-guaranteed correctness at the expense of verbosity (and maybe readability).
 
 *get_controllability_matrix*
 - *namespace dynamical::analysis*
 - *type: template function*
 - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
     - TODO: understand this better.
-- The current implementation returns the controllability matrix by value. This could be an expensive operation if the matrix is large. An alternative is returning by reference, but undefined behavior would result because the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function. Since this is a generic analysis function that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
-    - TODO: explore alternate possibilities to avoid expensive copy operation while maintaining ease of use.
+- The current implementation returns the controllability matrix by value. This could be an expensive operation if the matrix is large. However, since this is a generic analysis function that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
+    - An alternative is returning by reference, but undefined behavior would result if the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function.
+    - Another alternative is returning a smart pointer, but this would also require the user to do more work (and have an understanding of smart pointers).
+    - TODO: read up on return value optimization to see if this is really a problem at all.
+    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 
 *is_controllable*
 - *namespace dynamical::analysis*
