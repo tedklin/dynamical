@@ -22,6 +22,7 @@ class Plant {
 
   Plant() = delete;
 
+  // TODO: overload this with rvalue-type parameters for C and D?
   Plant(const x_VectorType& x_initial, const A_MatrixType& A,
         const B_MatrixType& B, const C_MatrixType& C = C_MatrixType::Identity(),
         const D_MatrixType& D = D_MatrixType::Zero())
@@ -31,9 +32,11 @@ class Plant {
 
   virtual void Update(const u_VectorType& u) = 0;
 
+  void ResetToXInitial() { x_ = x_initial_; }
+
   void SetXInitial(const x_VectorType& initial_x) { x_initial_ = initial_x; }
 
-  void ResetToXInitial() { x_ = x_initial_; }
+  const x_VectorType& GetXInitial() const { return x_initial_; }
 
   const x_VectorType& GetX() const { return x_; }
 
@@ -73,6 +76,7 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
+  // TODO: implement this real-time?
   void Update(const u_VectorType& u) override {}
 
   void UpdateSim(const u_VectorType& u, double dt) {
