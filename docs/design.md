@@ -1,6 +1,6 @@
 # Design document
 
-This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design, so it's admittedly pretty pedantic.
+This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It's admittedly pretty pedantic :)
 
 ## Some driving design goals
 
@@ -13,15 +13,28 @@ This living document is intended to lay out software design decisions and non-ob
 2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
         - e.g. each block type in a typical control system diagram should be its own class.
-    - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
-        - don't really know if this increases performance in any way but it keeps class definitions more readable.
+    - Levels of functionality based on external dependencies and other overhead.
+        - Each level of functionality should work on its own and not be too entangled with higher levels of functionality, especially ones that introduce external dependencies.
+        - Prefer to define non-core functionality as generic functions that act on a given object instead of member functions contained within each object.
 3. Efficiency
     - Optimizations like enabling move operations where it makes sense.
+        - Keep in mind optimizations the compiler itself can make too, like copy elision / RVO.
     - Learn how to use tools like sanitizers and profilers. 
 4. Application-focused
     - Keep in mind the applications a library like this could be used for, and design around that.
 
+
+## Levels of functionality
+
+1. Real-time discrete and "continuous" (with onboard discretization) linear control systems
+2. Linear systems analysis
+4. Real-time nonlinear control systems (onboard linearization)
+4. Onboard calculations for optimal control (LQR, etc.)
+
+
 ## High-level TODOs
+- TEMPLATES. ARE. EVERYWHERE.
+    - TODO: how to make this cleaner???????
 - The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large.
     - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
     - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
@@ -38,9 +51,9 @@ This living document is intended to lay out software design decisions and non-ob
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
 
 
-## state_space
+## File-by-file implementation details
 
-### plant.hpp
+### state_space/plant.hpp
 *Plant*
 - *namespace dynamical*
 - *type: template abstract class*
@@ -85,12 +98,14 @@ This living document is intended to lay out software design decisions and non-ob
         - https://en.cppreference.com/w/cpp/chrono/time_point
 
 
-### controller.hpp
+### state_space/controller.hpp
 
 
-### analysis.hpp
+### state_space/analysis.hpp
 
 overall notes
+- The current implementation is pretty cluttered because I read that template definitions shouldn't be separated from their declarations.
+    - TODO: is there a better way to organize this or just leave it as is?
 - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
 
 *get_controllability_matrix*
