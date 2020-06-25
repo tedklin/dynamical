@@ -1,6 +1,6 @@
 # Design document
 
-This document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design, so it's admittedly pretty pedantic.
+This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for self-reflection purposes and the opportunity to fix bad C++ practices / wrong assumptions about control system design, so it's admittedly pretty pedantic.
 
 ## Some driving design goals
 
@@ -12,7 +12,7 @@ This document is intended to lay out software design decisions and non-obvious c
     - Tests! Lots of tests!
 2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
-        - i.e. each block type in a typical control system diagram should be its own class.
+        - e.g. each block type in a typical control system diagram should be its own class.
     - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
         - don't really know if this increases performance in any way but it keeps class definitions more readable.
 3. Efficiency
@@ -21,9 +21,26 @@ This document is intended to lay out software design decisions and non-obvious c
 4. Application-focused
     - Keep in mind the applications a library like this could be used for, and design around that.
 
+## High-level TODOs
+- The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large.
+    - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
+    - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
+    - TODO: read up on return value optimization to see if this is really a problem at all.
+        - i understand copy elision, but when a function returns a local object by value, does it do so by copying or does it implictly use move?
+        - **this question extends to a lot of my currently implemented code.**
+    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
+- Some of the decisions I'm making are taking into heavy consideration possible usage with my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). This might result in some features that don't make sense for real world systems.
+    - TODO: decide if satisfying 16B constraints is really worth it.
+
+
+## High-level design notes
+- Most of the math is implemented with techniques we learned in 16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). However, there are some clashes in convention between the two sources:
+    - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
+
+
 ## state_space
 
-### plant.h
+### plant.hpp
 *Plant*
 - *namespace dynamical*
 - *type: template abstract class*
@@ -42,12 +59,11 @@ This document is intended to lay out software design decisions and non-obvious c
         - Note that if users do need to create a Plant without any dynamics, they can still do so explicitly.
     - one defined constructor, with the initial state vector as the first argument and default arguments for the C and D matrices.
         - I don't have much experience with implementation of state-space controllers in practice, so I don't really know if this was the best decision. The considerations I took for the design of the constructor(s) for this class are as follows:
-            - In my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
+            - In EECS16B, the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
                 - This is also why the template parameter num_outputs has a default argument of num_states.
             - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicitly defined C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). I haven't seen as strong of a need for an explicit D matrix (and it seems like it reduces some computations), so there may be many cases where only A, B, and C are defined.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
-        - TODO: decide if satisfying 16B constraints like this is really worth it. Alternatively we could just give users the responsibility of passing in special matrix types, in which case it might be useful to have an overloaded constructor that takes rvalues for C and D.
 - copy-control.
     - none explicitly defined (Rule of Zero).
     - all are synthesized(?)
@@ -69,17 +85,13 @@ This document is intended to lay out software design decisions and non-obvious c
         - https://en.cppreference.com/w/cpp/chrono/time_point
 
 
-### analysis.h
+### controller.hpp
+
+
+### analysis.hpp
 
 overall notes
 - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
-- The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large. However, since these are generic analysis functions that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
-    - An alternative is returning by reference, but undefined behavior would result if the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function.
-    - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
-    - TODO: read up on return value optimization to see if this is really a problem at all.
-        - i.e. when a function returns a local object by value, does it do so by copying or does it implictly use move?
-            - **this question extends to a lot of my currently implemented code.**
-    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 
 *get_controllability_matrix*
 - *namespace dynamical::analysis*

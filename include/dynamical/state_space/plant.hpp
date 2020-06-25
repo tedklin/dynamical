@@ -22,7 +22,6 @@ class Plant {
 
   Plant() = delete;
 
-  // TODO: overload this with rvalue-type parameters for C and D?
   Plant(const x_VectorType& x_initial, const A_MatrixType& A,
         const B_MatrixType& B, const C_MatrixType& C = C_MatrixType::Identity(),
         const D_MatrixType& D = D_MatrixType::Zero())

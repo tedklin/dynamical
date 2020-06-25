@@ -29,7 +29,7 @@ class Feedback {
 
   u_VectorType GetU(const x_VectorType& x_hat,
                     const x_VectorType& ref = x_VectorType::Zero()) const {
-    return -K_ * x_hat + K_ref_ * ref;
+    return K_ * x_hat + K_ref_ * ref;
   }
 
   const K_MatrixType& GetK() const { return K_; }

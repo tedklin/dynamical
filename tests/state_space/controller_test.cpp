@@ -25,7 +25,7 @@ TEST(ControllerTest, FeedbackSanityCheck) {
   SimplePlant::x_VectorType desired_state = SimplePlant::x_VectorType::Random();
 
   SimplePlant::u_VectorType expected_u =
-      -test_K * curr_state + test_Kref * desired_state;
+      test_K * curr_state + test_Kref * desired_state;
   ASSERT_TRUE(test_utils::check_matrix_equality(
       expected_u, feedback.GetU(curr_state, desired_state)));
 }
