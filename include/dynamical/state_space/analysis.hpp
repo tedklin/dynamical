@@ -43,26 +43,43 @@ bool is_controllable(
 
 // TODO: get_observability_matrix and check_observability?
 
-// TODO: merge the two stability functions somehow (the only difference is the
-// stability condition based on whether the plant is discrete or continuous).
+template <typename Scalar, int state_dim>
+bool stability_helper(
+    const Eigen::Matrix<Scalar, state_dim, state_dim>& dynamics_matrix,
+    bool is_discrete) {
+  Eigen::EigenSolver<Eigen::Matrix<Scalar, state_dim, state_dim>> eigensolver(
+      dynamics_matrix);
+  Eigen::Matrix<std::complex<double>, state_dim, 1> eigenvalues =
+      eigensolver.eigenvalues();
+
+  for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
+    std::cout << eigenvalues(row, 0) << '\n';
+    if (is_discrete && std::abs(eigenvalues(row, 0)) >= 1) {
+      std::cout
+          << "(dynamical) stability: triggered discrete unstable condition\n";
+      return false;
+    }
+    if (!is_discrete && eigenvalues(row, 0).real() > 0) {
+      std::cout
+          << "(dynamical) stability: triggered continuous unstable condition\n";
+      return false;
+    }
+  }
+  return true;
+}
+
+// TODO: consider type identification (tricky with templates, use std::issame)
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(
     const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
         discrete_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
+  std::cout << "running discrete stability check...\n\n";
+
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       discrete_plant.A_ + discrete_plant.B_ * feedback.GetK();
-  Eigen::EigenSolver<Eigen::Matrix<Scalar, state_dim, state_dim>> eigensolver(
-      dynamics_matrix);
 
-  Eigen::Matrix<std::complex<double>, state_dim, 1> eigenvalues =
-      eigensolver.eigenvalues();
-  for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
-    if (std::abs(eigenvalues(row, 0)) >= 1) {
-      return false;
-    }
-  }
-  return true;
+  return stability_helper(dynamics_matrix, true);
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
@@ -70,19 +87,28 @@ bool is_stable(
     const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
         continuous_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
+  std::cout << "running continuous stability check...\n\n";
+
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       continuous_plant.A_ + continuous_plant.B_ * feedback.GetK();
-  Eigen::EigenSolver<Eigen::Matrix<Scalar, state_dim, state_dim>> eigensolver(
-      dynamics_matrix);
 
-  Eigen::Matrix<std::complex<double>, state_dim, 1> eigenvalues =
-      eigensolver.eigenvalues();
-  for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
-    if (eigenvalues(row, 0).real() > 0) {
-      return false;
-    }
-  }
-  return true;
+  return stability_helper(dynamics_matrix, false);
+}
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
+                   discrete_plant) {
+  std::cout << "running discrete stability check...\n\n";
+
+  return stability_helper(discrete_plant.A_, true);
+}
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+                   continuous_plant) {
+  std::cout << "running continuous stability check...\n\n";
+
+  return stability_helper(continuous_plant.A_, false);
 }
 
 // discretization by diagonalization

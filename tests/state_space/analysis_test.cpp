@@ -144,9 +144,34 @@ TEST(Stability, StableDiscrete) {}
 
 TEST(Stability, StableDiscrete_Sim) {}
 
+TEST(Stability, StableContinuous) {
+  constexpr int num_states = 3, num_inputs = 1;  // num_outputs = 3
+  using ContinuousPlant = dynamical::ContinuousPlant<num_states, num_inputs>;
+  using FeedbackType = dynamical::Feedback<num_states, num_inputs>;
+
+  ContinuousPlant::A_MatrixType test_A;
+  test_A << /*[[*/ 0, 1, 0 /*]*/,
+      /*[*/ 100, 0, 0 /*]*/,
+      /*[*/ 0, 0, 0 /*]]*/;
+  ContinuousPlant::B_MatrixType test_B;
+  test_B << /*[[*/ 0 /*]*/,
+      /*[*/ -25 /*]*/,
+      /*[*/ 500 /*]]*/;
+
+  FeedbackType::K_MatrixType test_K;
+  test_K << 20, 5, 0.01;
+
+  ContinuousPlant::x_VectorType x_initial =
+      ContinuousPlant::x_VectorType::Random();
+
+  ContinuousPlant plant(x_initial, test_A, test_B);
+  FeedbackType feedback(test_K);
+
+  ASSERT_TRUE(dynamical::analysis::is_stable(plant, feedback));
+}
+
 // TODO: before implementing this, test PropagateContinuousDynamics in
 // plant_test.cpp
-TEST(Stability, StableContinuous) {}
 TEST(Stability, StableContinuous_Sim) {}
 
 TEST(Discretization, DiscretizationOfA) {
