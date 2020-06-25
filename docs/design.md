@@ -2,6 +2,7 @@
 
 This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It's admittedly pretty pedantic :)
 
+
 ## Some driving design goals
 
 1. User-safety
@@ -117,6 +118,11 @@ overall notes
 *is_controllable*
 - *namespace dynamical::analysis*
 - *type: template function*
+
+*is_stable*
+- *namespace dynamical::analysis*
+- *type: template function*
+- TODO: get rid of repetition for discrete and continuous cases somehow?
 
 *discretize*
 - *namespace dynamical::analysis*

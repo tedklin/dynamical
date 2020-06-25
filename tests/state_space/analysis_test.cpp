@@ -12,7 +12,7 @@
 namespace testing {
 
 // TODO: parameterize and fuzz controllability matrix tests?
-TEST(AnalysisTest, ControllabilityMatrixSISO) {
+TEST(Controllability, ControllabilityMatrixSISO) {
   // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
@@ -39,7 +39,7 @@ TEST(AnalysisTest, ControllabilityMatrixSISO) {
       manual_controllability_matrix, calculated_controllability_matrix));
 }
 
-TEST(AnalysisTest, ControllabilityMatrixMIMO) {
+TEST(Controllability, ControllabilityMatrixMIMO) {
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
@@ -65,7 +65,7 @@ TEST(AnalysisTest, ControllabilityMatrixMIMO) {
       manual_controllability_matrix, calculated_controllability_matrix));
 }
 
-TEST(AnalysisTest, ControllableSISO) {
+TEST(Controllability, ControllableSISO) {
   // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
@@ -85,7 +85,7 @@ TEST(AnalysisTest, ControllableSISO) {
   ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
 }
 
-TEST(AnalysisTest, UncontrollableSISO) {
+TEST(Controllability, UncontrollableSISO) {
   // example 3: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
@@ -105,7 +105,7 @@ TEST(AnalysisTest, UncontrollableSISO) {
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
 }
 
-TEST(AnalysisTest, ControllableMIMO) {
+TEST(Controllability, ControllableMIMO) {
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
@@ -122,7 +122,7 @@ TEST(AnalysisTest, ControllableMIMO) {
   ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
 }
 
-TEST(AnalysisTest, UncontrollableMIMO) {
+TEST(Controllability, UncontrollableMIMO) {
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
@@ -140,7 +140,16 @@ TEST(AnalysisTest, UncontrollableMIMO) {
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
 }
 
-TEST(AnalysisTest, DiscretizationSimple) {
+TEST(Stability, StableDiscrete) {}
+
+TEST(Stability, StableDiscrete_Sim) {}
+
+// TODO: before implementing this, test PropagateContinuousDynamics in
+// plant_test.cpp
+TEST(Stability, StableContinuous) {}
+TEST(Stability, StableContinuous_Sim) {}
+
+TEST(Discretization, DiscretizationOfA) {
   // example 1: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
@@ -175,7 +184,7 @@ TEST(AnalysisTest, DiscretizationSimple) {
   }
 }
 
-TEST(AnalysisTest, DiscretizationSimpleFuzz) {
+TEST(Discretization, DiscretizationOfA_Fuzz) {
   // this test takes advantage of the fact that eigenvalues of a continuous
   // system end up in the exponent of its discretized version.
 
@@ -210,7 +219,7 @@ TEST(AnalysisTest, DiscretizationSimpleFuzz) {
 }
 
 // TODO: finish implementing this and discretization MIMO test
-TEST(AnalysisTest, DiscretizationSISO) {
+TEST(Discretization, DiscretizationSISO) {
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
       dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
@@ -232,5 +241,11 @@ TEST(AnalysisTest, DiscretizationSISO) {
   DiscretePlant discrete_plant =
       dynamical::analysis::discretize(continuous_plant, 0.01);
 }
+
+TEST(Discretization, DiscretizationMIMO) {}
+
+// TODO: compare discretization against the parent continuous system's Update
+// function?
+TEST(Discretization, Discretization_Sim) {}
 
 }  // namespace testing

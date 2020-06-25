@@ -79,7 +79,6 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   void Update(const u_VectorType& u) override {}
 
   void UpdateSim(const u_VectorType& u, double dt) {
-    // TODO: test this against discretized model?
     // https://en.cppreference.com/w/cpp/language/lambda#Lambda_capture
     this->x_ = numerical::integration::rk4(
         [&](const x_VectorType& x) -> x_VectorType {

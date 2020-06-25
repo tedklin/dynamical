@@ -7,7 +7,7 @@
 
 namespace testing {
 
-TEST(IntegrationTest, RK4Scalar) {
+TEST(Integration, RK4Scalar) {
   // we know the function dy_dt(y) (this is what's inside the lambda)
   // we also know y0 at some time t0.
   // runge kutta gives y1, which is y(t0 + dt)
@@ -21,6 +21,6 @@ TEST(IntegrationTest, RK4Scalar) {
   //     [](const double& x) -> double { return std::exp(x); }, 2.0, 0.01);
 }
 
-TEST(IntegrationTest, RK4Vector) {}
+TEST(Integration, RK4Vector) {}
 
 }  // namespace testing

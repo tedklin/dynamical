@@ -10,7 +10,7 @@
 
 namespace testing {
 
-TEST(PlantTest, DimensionCheck) {
+TEST(Plant, DimensionCheck) {
   constexpr int num_states = 3, num_inputs = 2, num_outputs = num_states;
   using SimplePlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs, double>;
@@ -33,7 +33,7 @@ TEST(PlantTest, DimensionCheck) {
   ASSERT_EQ(num_inputs, plant.D_.cols());
 }
 
-TEST(PlantTest, DefaultArgumentCheck) {
+TEST(Plant, DefaultArgumentCheck) {
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
   using SimplePlant = dynamical::DiscretePlant<num_states, num_inputs>;
   SimplePlant plant(SimplePlant::x_VectorType::Random(),
@@ -44,7 +44,7 @@ TEST(PlantTest, DefaultArgumentCheck) {
   ASSERT_EQ(SimplePlant::D_MatrixType::Zero(), plant.D_);
 }
 
-TEST(PlantTest, PropagateDiscreteDynamics) {
+TEST(Plant, PropagateDiscreteDynamics) {
   // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
@@ -86,5 +86,10 @@ TEST(PlantTest, PropagateDiscreteDynamics) {
     // std::cout << "\nX Actual: \n" << plant.GetX() << "\n\n";
   }
 }
+
+// TODO: before implementing this, test runge kutta in integration_test.cpp
+TEST(Plant, PropagateContinuousDynamics_Sim) {}
+
+TEST(Plant, PropagateContinuousDynamics_RT) {}
 
 }  // namespace testing
