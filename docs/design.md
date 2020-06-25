@@ -40,14 +40,17 @@ This document is intended to lay out software design decisions and non-obvious c
     - deleted default constructor
         - In general, it doesn't make sense to create a Plant without any dynamics.
         - Note that if users do need to create a Plant without any dynamics, they can still do so explicitly.
-    - one defined constructor, with default arguments for the C and D matrices and the initial state vector as the first argument.
+    - one defined constructor, with the initial state vector as the first argument and default arguments for the C and D matrices.
         - I don't have much experience with implementation of state-space controllers in practice, so I don't really know if this was the best decision. The considerations I took for the design of the constructor(s) for this class are as follows:
-            - In my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
-            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicit C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). On the other hand, I haven't seen as strong of a need for the D matrix (and it seems like it would save on computation), so D might be safe to ignore in many cases.
+            - In my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
+                - This is also why the template parameter num_outputs has a default argument of num_states.
+            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicitly defined C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). I haven't seen as strong of a need for an explicit D matrix (and it seems like it reduces some computations), so there may be many cases where only A, B, and C are defined.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
-    - no explicitly defined copy-control.
-        - Rule of Zero.
+        - TODO: decide if satisfying 16B constraints like this is really worth it. Alternatively we could just give users the responsibility of passing in special matrix types, in which case it might be useful to have an overloaded constructor that takes rvalues for C and D.
+- copy-control.
+    - none explicitly defined (Rule of Zero).
+    - all are synthesized(?)
 
 *DiscretePlant*
 - *namespace dynamical*
@@ -58,22 +61,30 @@ This document is intended to lay out software design decisions and non-obvious c
 *ContinuousPlant*
 - *namespace dynamical*
 - *type: template class implementation of Plant*
+- TODO: explore accuracy / efficiency of integration methods.
+- TODO: implement Update() as real-time update?
+    - std::chrono
+        - https://stackoverflow.com/questions/728068/how-to-calculate-a-time-difference-in-c
+        - https://en.cppreference.com/w/cpp/chrono/duration
+        - https://en.cppreference.com/w/cpp/chrono/time_point
+
 
 ### analysis.h
 
 overall notes
-    - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This resulted in better-guaranteed correctness at the expense of verbosity (and maybe readability).
+- The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
+- The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large. However, since these are generic analysis functions that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
+    - An alternative is returning by reference, but undefined behavior would result if the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function.
+    - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
+    - TODO: read up on return value optimization to see if this is really a problem at all.
+        - i.e. when *discretize* returns the discretized plant, does it do so by value or does it implictly use move?
+    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 
 *get_controllability_matrix*
 - *namespace dynamical::analysis*
 - *type: template function*
 - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
     - TODO: understand this better.
-- The current implementation returns the controllability matrix by value. This could be an expensive operation if the matrix is large. However, since this is a generic analysis function that would probably not be called in real-time implementations (it will most likely be run offline first), the inconvenience of forcing the user to declare their own type / dimensions for the controllability matrix outweighs the cost of the copy operation.
-    - An alternative is returning by reference, but undefined behavior would result if the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function.
-    - Another alternative is returning a smart pointer, but this would also require the user to do more work (and have an understanding of smart pointers).
-    - TODO: read up on return value optimization to see if this is really a problem at all.
-    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 
 *is_controllable*
 - *namespace dynamical::analysis*
