@@ -12,9 +12,10 @@ template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
 class Feedback {
  public:
-  // using PlantType = Plant<state_dim, input_dim, output_dim, Scalar>;
-  using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
-  using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
+  // TODO: figure out how to forward types from a completely unrelated template
+  // (in this case, Plant<..>)
+  using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
+  using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
   // K_ref matrix dimensions are different than K if our reference signal is not
   // full state, but we should be able to just avoid this by ensuring our
@@ -26,12 +27,9 @@ class Feedback {
                     const K_MatrixType& K_ref = K_MatrixType::Zero())
       : K_(K), K_ref_(K_ref) {}
 
-  u_VectorType GetU(const x_VectorType& x,
+  u_VectorType GetU(const x_VectorType& x_hat,
                     const x_VectorType& ref = x_VectorType::Zero()) const {
-    // TODO: can we directly return this or no?
-    // (what does copy-returning an Eigen rvalue do?)
-    u_VectorType u = -K_ * x + K_ref_ * ref;
-    return u;
+    return -K_ * x_hat + K_ref_ * ref;
   }
 
   const K_MatrixType& GetK() const { return K_; }
@@ -49,7 +47,9 @@ class Feedback {
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
-class Observer {};
+class Observer {
+  // TODO: implement
+};
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
@@ -60,7 +60,7 @@ class Controller {
 
   Controller(std::shared_ptr<FeedbackType> feedback_ptr,
              std::shared_ptr<ObserverType> observer_ptr)
-      : feedback_ptr_(feedback), observer_ptr_(observer) {}
+      : feedback_ptr_(feedback_ptr), observer_ptr_(observer_ptr) {}
 
   // TODO: does this even make sense to have?
   Controller(const FeedbackType& feedback, const ObserverType& observer) {

@@ -13,10 +13,10 @@ This document is intended to lay out software design decisions and non-obvious c
 2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
         - i.e. each block type in a typical control system diagram should be its own class.
+    - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
+        - don't really know if this increases performance in any way but it keeps class definitions more readable.
 3. Efficiency
     - Optimizations like enabling move operations where it makes sense.
-    - Prefer to define generic functions that act on a given object instead of member functions contained within each object.
-        - don't really know if this actually increases performance in any way but it also keeps class definitions more readable.
     - Learn how to use tools like sanitizers and profilers. 
 4. Application-focused
     - Keep in mind the applications a library like this could be used for, and design around that.
@@ -77,7 +77,8 @@ overall notes
     - An alternative is returning by reference, but undefined behavior would result if the controllability matrix is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their own controllability matrix first, then pass it by reference as an argument to the function.
     - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
     - TODO: read up on return value optimization to see if this is really a problem at all.
-        - i.e. when *discretize* returns the discretized plant, does it do so by value or does it implictly use move?
+        - i.e. when a function returns a local object by value, does it do so by copying or does it implictly use move?
+            - **this question extends to a lot of my currently implemented code.**
     - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 
 *get_controllability_matrix*
