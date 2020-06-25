@@ -1,15 +1,9 @@
-# Note that headers are optional, and do not affect add_library, but they will not
-# show up in IDEs unless they are listed in add_library.
-
-list(APPEND HEADER_LIST "${PROJECT_SOURCE_DIR}/include/dynamical/state_space/plant.h")
-list(APPEND HEADER_LIST "${PROJECT_SOURCE_DIR}/include/dynamical/state_space/analysis.h")
-# ^ APPEND NEW HEADERS TO THE HEADER_LIST
-
 list(APPEND SOURCE_LIST "${PROJECT_SOURCE_DIR}/src/placeholder.cpp")
 # ^ APPEND NEW SOURCE FILES TO THE SOURCE_LIST
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(dynamical_lib ${SOURCE_LIST} ${HEADER_LIST})
+# add_library(dynamical_lib ${SOURCE_LIST} ${HEADER_LIST})
+add_library(dynamical_lib ${SOURCE_LIST})
 
 # We need this directory, and users of our library will need it too
 target_include_directories(dynamical_lib PUBLIC ../include)
@@ -21,6 +15,3 @@ target_link_libraries(dynamical_lib PUBLIC Eigen3::Eigen)
 
 # All users of this library will need at least C++11
 target_compile_features(dynamical_lib PUBLIC cxx_std_11)
-
-# IDEs should put the headers in a nice place
-source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${HEADER_LIST})

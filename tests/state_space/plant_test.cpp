@@ -1,7 +1,7 @@
-#include "dynamical/state_space/plant.h"
+#include "dynamical/state_space/plant.hpp"
 
-#include "dynamical/state_space/analysis.h"
-#include "dynamical/test_utils.h"
+#include "dynamical/state_space/analysis.hpp"
+#include "dynamical/test_utils.hpp"
 
 #include <iostream>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dynamical/state_space/plant.h"
+#include "dynamical/state_space/plant.hpp"
 
 #include <memory>
 

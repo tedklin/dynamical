@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dynamical/math/integration.h"
+#include "dynamical/math/integration.hpp"
 
 #include <cmath>
 
