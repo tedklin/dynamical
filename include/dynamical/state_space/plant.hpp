@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dynamical/math/integration.hpp"
+#include "dynamical/math/integral.hpp"
 
 #include <cmath>
 
@@ -80,7 +80,7 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
 
   void UpdateSim(const u_VectorType& u, double dt) {
     // https://en.cppreference.com/w/cpp/language/lambda#Lambda_capture
-    this->x_ = numerical::integration::rk4(
+    this->x_ = numerical::integral::rk4(
         [&](const x_VectorType& x) -> x_VectorType {
           return this->A_ * x + this->B_ * u;
         },

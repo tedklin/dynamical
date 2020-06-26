@@ -4,7 +4,7 @@
 
 namespace dynamical {
 namespace numerical {
-namespace integration {
+namespace integral {
 // TODO: add other numerical integration techniques?
 // keep in mind they should all have the same parameter list and return type.
 
@@ -33,6 +33,6 @@ T rk4(std::function<T(const T&)> dy_dt, T y0, double dt) {
 //   return y0 + (dt / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4));
 // }
 
-}  // namespace integration
+}  // namespace integral
 }  // namespace numerical
 }  // namespace dynamical

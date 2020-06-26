@@ -1,4 +1,4 @@
-#include "dynamical/math/integration.hpp"
+#include "dynamical/math/integral.hpp"
 
 #include <cmath>
 
@@ -17,7 +17,7 @@ TEST(Integration, RK4Scalar) {
   // but then what parameter does y take (if not time) and how can we test
   // this???
 
-  // double result = dynamical::numerical::integration::rk4(
+  // double result = dynamical::numerical::integral::rk4(
   //     [](const double& x) -> double { return std::exp(x); }, 2.0, 0.01);
 }
 
