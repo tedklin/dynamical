@@ -30,7 +30,7 @@ This living document is intended to lay out software design decisions and non-ob
 1. Real-time discrete and "continuous" (with onboard discretization) linear control systems
 2. Linear systems analysis
 4. Real-time nonlinear control systems (onboard linearization)
-4. Onboard calculations for optimal control (LQR, etc.)
+4. Built-in calculations for optimal control (LQR, etc.)
 
 
 ## High-level TODOs
@@ -105,7 +105,7 @@ This living document is intended to lay out software design decisions and non-ob
 ### state_space/analysis.hpp
 
 overall notes
-- The current implementation is pretty cluttered because I read that template definitions shouldn't be separated from their declarations.
+- The current implementation is pretty cluttered and not pleasing to the eyes. But template definitions shouldn't be separated from their declarations, so I'm not really sure how to make this better.
     - TODO: is there a better way to organize this or just leave it as is?
 - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
 
@@ -119,10 +119,23 @@ overall notes
 - *namespace dynamical::analysis*
 - *type: template function*
 
+*get_observability_matrix*
+- *namespace dynamical::analysis*
+- *type: template function*
+
+*is_observable*
+- *namespace dynamical::analysis*
+- *type: template function*
+
+*stability_helper*
+- *namespace dynamical::analysis*
+- *type: template function*
+
 *is_stable*
 - *namespace dynamical::analysis*
 - *type: template function*
-- TODO: get rid of repetition for discrete and continuous cases somehow?
+- TODO: figure out if four overloads for this method is really necessary.
+    - but don't cut down on overloads if it means losing guarantees on correctness.
 
 *discretize*
 - *namespace dynamical::analysis*

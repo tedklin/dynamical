@@ -15,7 +15,6 @@ namespace testing {
 /* === CONTROLLABILITY TESTS === */
 /* ============================= */
 
-// TODO: fuzz controllability matrix tests?
 TEST(Controllability, SISO_ControllabilityMatrix) {
   // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
@@ -345,6 +344,7 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
     ContinuousPlant continuous_plant(x_initial, test_A, test_B);
     ContinuousPlant continuous_plant_doubled(x_initial, test_A * 2, test_B);
 
+    // making sure it works for all kinds of values of dt
     for (double dt = 2; dt > 0.001; dt /= 2) {
       DiscretePlant discrete_plant =
           dynamical::analysis::discretize(continuous_plant, dt);

@@ -41,13 +41,13 @@ bool is_controllable(
   return rank >= state_dim;
 }
 
-// TODO: implement
+// TODO: implement get_observability_matrix
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_observability_matrix(
     const Plant<state_dim, input_dim, output_dim, Scalar>& plant,
     int num_steps_allowed = state_dim) {}
 
-// TODO: implement
+// TODO: implement is_observable
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_observable(
     const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {}
@@ -67,11 +67,11 @@ bool stability_helper(
   for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
     std::cout << eigenvalues(row, 0) << '\n';
     if (is_discrete && std::abs(eigenvalues(row, 0)) >= 1) {
-      std::cout << "triggered discrete unstable criterion\n\n";
+      std::cout << "triggered discrete unstable criterion\n";
       return false;
     }
     if (!is_discrete && eigenvalues(row, 0).real() > 0) {
-      std::cout << "triggered continuous unstable criterion\n\n";
+      std::cout << "triggered continuous unstable criterion\n";
       return false;
     }
   }
@@ -178,9 +178,12 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
       discretized_plant(continuous_plant.GetX(), A_discretized, B_discretized,
                         continuous_plant.C_, continuous_plant.D_);
 
-  // std::cout << A_eigenbasis << "\n\n";
-  // std::cout << A_eigenbasis_inverse << "\n\n";
-  // std::cout << A_eigenvalues << "\n\n";
+  // std::cout << "discretizing..." << "\n\n";
+  // std::cout << "V (eigenbasis):\n" << A_eigenbasis << "\n\n";
+  // std::cout << "V^-1:\n" << A_eigenbasis_inverse << "\n\n";
+  // std::cout << "eigenvalues:\n" << A_eigenvalues << "\n\n";
+  // std::cout << "A_discretized\n" << A_discretized << "\n\n";
+  // std::cout << "B_discretized\n" << B_discretized << "\n\n";
 
   return discretized_plant;
 }
