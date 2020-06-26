@@ -4,7 +4,7 @@
 #include "dynamical/state_space/plant.hpp"
 
 #include <cmath>
-#include <iostream>  // TODO: take iostream out after debugging
+#include <iostream>  // TODO: remove or keep diagnostic prints?
 #include <stdexcept>
 
 namespace dynamical {
@@ -41,8 +41,18 @@ bool is_controllable(
   return rank >= state_dim;
 }
 
-// TODO: get_observability_matrix and check_observability?
+// TODO: implement
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_observability_matrix(
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant,
+    int num_steps_allowed = state_dim) {}
 
+// TODO: implement
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_observable(
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {}
+
+// TODO: remove or keep diagnostic prints?
 template <typename Scalar, int state_dim>
 bool stability_helper(
     const Eigen::Matrix<Scalar, state_dim, state_dim>& dynamics_matrix,
@@ -52,16 +62,16 @@ bool stability_helper(
   Eigen::Matrix<std::complex<double>, state_dim, 1> eigenvalues =
       eigensolver.eigenvalues();
 
+  std::cout << "dynamics matrix:\n" << dynamics_matrix << "\n\neigenvalues:\n";
+
   for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
     std::cout << eigenvalues(row, 0) << '\n';
     if (is_discrete && std::abs(eigenvalues(row, 0)) >= 1) {
-      std::cout
-          << "(dynamical) stability: triggered discrete unstable condition\n";
+      std::cout << "triggered discrete unstable criterion\n\n";
       return false;
     }
     if (!is_discrete && eigenvalues(row, 0).real() > 0) {
-      std::cout
-          << "(dynamical) stability: triggered continuous unstable condition\n";
+      std::cout << "triggered continuous unstable criterion\n\n";
       return false;
     }
   }
@@ -83,6 +93,14 @@ bool is_stable(
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
+                   discrete_plant) {
+  std::cout << "running discrete stability check...\n\n";
+
+  return stability_helper(discrete_plant.A_, true);
+}
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(
     const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
         continuous_plant,
@@ -96,14 +114,6 @@ bool is_stable(
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
-                   discrete_plant) {
-  std::cout << "running discrete stability check...\n\n";
-
-  return stability_helper(discrete_plant.A_, true);
-}
-
-template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
                    continuous_plant) {
   std::cout << "running continuous stability check...\n\n";
@@ -111,6 +121,7 @@ bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
   return stability_helper(continuous_plant.A_, false);
 }
 
+// TODO: remove or keep diagnostic prints?
 // discretization by diagonalization
 // the returned discrete model has complex Scalar type std::complex<double>
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf

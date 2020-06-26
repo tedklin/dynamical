@@ -60,7 +60,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
       /*[*/ 1 /*]]*/;
 
   // test a couple of random initial state / target state pairs
-  for (int fuzz_index = 0; fuzz_index != 5; ++fuzz_index) {
+  for (int i = 0; i != 20; ++i) {
     SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
     SISOPlant plant(x_initial, test_A, test_B);
 
@@ -78,7 +78,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
     plant.Update(inverted_input_sequence.row(0));
     ASSERT_TRUE(test_utils::check_matrix_equality(x_target, plant.GetX()));
 
-    // std::cout << "Test #" << fuzz_index << " ===========\n";
+    // std::cout << "Test #" << i << " ===========\n";
     // std::cout << "\nX Initial: \n" << x_initial << '\n';
     // std::cout << "\nX Target: \n" << x_target << '\n';
     // std::cout << "\nControllability: \n" << controllability_matrix << '\n';
