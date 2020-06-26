@@ -8,7 +8,7 @@ addons:
     packages:
       - libeigen3-dev
 script:
-  # failed attempt at installing and using latest of cmake
+  # failed attempt at installing and using latest version of cmake
   # - sudo apt purge --auto-remove cmake
   # - sudo apt-get update
   # - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null

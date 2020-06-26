@@ -45,13 +45,13 @@ TEST(Plant, DefaultArgumentCheck) {
 }
 
 TEST(Plant, PropagateDiscreteDynamics) {
-  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // Example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  // explicitly define A and B matrices for system that we know is controllable
+  // Explicitly define A and B matrices for system that we know is controllable
   SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
       /*[*/ 0, 2 /*]]*/;
@@ -59,7 +59,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
 
-  // test a couple of random initial state / target state pairs
+  // Test a couple of random initial state / target state pairs
   for (int i = 0; i != 20; ++i) {
     SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
     SISOPlant plant(x_initial, test_A, test_B);
@@ -78,7 +78,8 @@ TEST(Plant, PropagateDiscreteDynamics) {
     plant.Update(inverted_input_sequence.row(0));
     ASSERT_TRUE(test_utils::check_matrix_equality(x_target, plant.GetX()));
 
-    // std::cout << "Test #" << i << " ===========\n";
+    // std::cout << "===============\n";
+    // std::cout << "Test #" << i << '\n';
     // std::cout << "\nX Initial: \n" << x_initial << '\n';
     // std::cout << "\nX Target: \n" << x_target << '\n';
     // std::cout << "\nControllability: \n" << controllability_matrix << '\n';

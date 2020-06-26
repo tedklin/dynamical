@@ -62,16 +62,17 @@ bool stability_helper(
   Eigen::Matrix<std::complex<double>, state_dim, 1> eigenvalues =
       eigensolver.eigenvalues();
 
-  std::cout << "dynamics matrix:\n" << dynamics_matrix << "\n\neigenvalues:\n";
+  // std::cout << "dynamics matrix:\n" << dynamics_matrix <<
+  // "\n\neigenvalues:\n";
 
   for (unsigned row = 0; row < eigenvalues.rows(); ++row) {
-    std::cout << eigenvalues(row, 0) << '\n';
+    // std::cout << eigenvalues(row, 0) << '\n';
     if (is_discrete && std::abs(eigenvalues(row, 0)) >= 1) {
-      std::cout << "triggered discrete unstable criterion\n";
+      // std::cout << "triggered discrete unstable criterion\n";
       return false;
     }
     if (!is_discrete && eigenvalues(row, 0).real() > 0) {
-      std::cout << "triggered continuous unstable criterion\n";
+      // std::cout << "triggered continuous unstable criterion\n";
       return false;
     }
   }
@@ -84,7 +85,7 @@ bool is_stable(
     const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
         discrete_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
-  std::cout << "running discrete stability check...\n\n";
+  // std::cout << "running discrete stability check...\n\n";
 
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       discrete_plant.A_ + discrete_plant.B_ * feedback.GetK();
@@ -95,7 +96,7 @@ bool is_stable(
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
                    discrete_plant) {
-  std::cout << "running discrete stability check...\n\n";
+  // std::cout << "running discrete stability check...\n\n";
 
   return stability_helper(discrete_plant.A_, true);
 }
@@ -116,7 +117,7 @@ bool is_stable(
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
                    continuous_plant) {
-  std::cout << "running continuous stability check...\n\n";
+  // std::cout << "running continuous stability check...\n\n";
 
   return stability_helper(continuous_plant.A_, false);
 }

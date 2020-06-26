@@ -16,7 +16,7 @@ namespace testing {
 /* ============================= */
 
 TEST(Controllability, SISO_ControllabilityMatrix) {
-  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // Example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
@@ -76,7 +76,7 @@ TEST(Controllability, MIMO_ControllabilityMatrix) {
 }
 
 TEST(Controllability, SISO_Controllable) {
-  // example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // Example 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
@@ -98,7 +98,7 @@ TEST(Controllability, SISO_Controllable) {
 }
 
 TEST(Controllability, SISO_Uncontrollable) {
-  // example 3: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // Example 3: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
@@ -120,25 +120,25 @@ TEST(Controllability, SISO_Uncontrollable) {
 }
 
 TEST(Controllability, MIMO_Controllable) {
-  // the probability of getting a random uncontrollable plant with the two
-  // states and two inputs should be very small. one matrix would have to be
+  // The probability of getting a random uncontrollable plant with the two
+  // states and two inputs should be very small. One matrix would have to be
   // something like the identity, and the other would have to be single-rank.
 
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
 
-  MIMOPlant::A_MatrixType test_A = MIMOPlant::A_MatrixType::Random();
-  MIMOPlant::B_MatrixType test_B = MIMOPlant::B_MatrixType::Random();
+  MIMOPlant::A_MatrixType random_A = MIMOPlant::A_MatrixType::Random();
+  MIMOPlant::B_MatrixType random_B = MIMOPlant::B_MatrixType::Random();
   MIMOPlant::x_VectorType x_initial = MIMOPlant::x_VectorType::Random();
 
-  MIMOPlant plant(x_initial, test_A, test_B);
+  MIMOPlant plant(x_initial, random_A, random_B);
 
   ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
 }
 
 TEST(Controllability, MIMO_Uncontrollable) {
-  // random numbers, checked by hand
+  // Random numbers, checked by hand.
 
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
@@ -164,7 +164,7 @@ TEST(Controllability, MIMO_Uncontrollable) {
 /* ======================= */
 
 TEST(Stability, Discrete_Unstable) {
-  // random numbers, checked by hand
+  // Random numbers, checked by hand.
 
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = 3
   using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
@@ -187,7 +187,7 @@ TEST(Stability, Discrete_Unstable) {
 }
 
 TEST(Stability, Discrete_Stable) {
-  // random numbers, checked by hand
+  // Random numbers, checked by hand.
 
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = 3
   using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
@@ -216,7 +216,7 @@ TEST(Stability, Discrete_Stable) {
 }
 
 TEST(Stability, Continuous_Unstable) {
-  // problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
+  // Problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
 
   constexpr int num_states = 3, num_inputs = 1;  // num_outputs = 3
   using ContinuousPlant = dynamical::ContinuousPlant<num_states, num_inputs>;
@@ -240,7 +240,7 @@ TEST(Stability, Continuous_Unstable) {
 }
 
 TEST(Stability, Continuous_Stable) {
-  // problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
+  // Problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
 
   constexpr int num_states = 3, num_inputs = 1;  // num_outputs = 3
   using ContinuousPlant = dynamical::ContinuousPlant<num_states, num_inputs>;
@@ -268,16 +268,87 @@ TEST(Stability, Continuous_Stable) {
   ASSERT_TRUE(dynamical::analysis::is_stable(plant, feedback));
 }
 
-// TODO: implement this
 TEST(Stability, Discrete_Fuzzed_Sim) {
-  // multiple tests with random matrices, comparing the result of is_stable
+  // Multiple tests with random matrices, comparing the result of is_stable
   // function against simulations with extended number of steps.
+
+  constexpr int num_states = 3, num_inputs = 2;
+  using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
+  using Feedback = dynamical::Feedback<num_states, num_inputs>;
+
+  int stable_systems_generated = 0, controllable_systems_generated = 0;
+
+  for (int i = 0; i != 50; ++i) {
+    std::cout << "========================\n";
+    std::cout << "test #" << i << ":\n\n";
+
+    // Eigen's random generates floating point numbers in the range (-1.0, 1.0).
+    // To increase the chances of generating a stable system, we make the plant
+    // matrices strictly positive and the feedback matrices strictly negative.
+    DiscretePlant::A_MatrixType random_A =
+        DiscretePlant::A_MatrixType::Random().cwiseAbs() * 1.2;
+    DiscretePlant::B_MatrixType random_B =
+        DiscretePlant::B_MatrixType::Random().cwiseAbs() * 1.2;
+
+    std::cout << "A:\n" << random_A << "\n\n";
+    std::cout << "B:\n" << random_B << "\n\n";
+
+    // The difference between the initial condition and our target state (in
+    // this case, zero) needs to be large enough to show clear divergence but
+    // small enough to not hit infinite values.
+    DiscretePlant::x_VectorType x_initial, ref;
+    x_initial << 5, 5, 5;
+    DiscretePlant plant(x_initial, random_A, random_B);
+
+    // The system has to be controllable to guarantee that the controller can
+    // actually reach our target state.
+    if (!dynamical::analysis::is_controllable(plant)) {
+      std::cout << "uncontrollable system, skipping to next case...\n\n";
+      continue;
+    }
+    std::cout << "controllable system, continuing...\n";
+    ++controllable_systems_generated;
+
+    Feedback::K_MatrixType random_K =
+        Feedback::K_MatrixType::Random().cwiseAbs() * -1;
+    Feedback feedback(random_K);
+
+    std::cout << "K:\n" << random_K << "\n\n";
+
+    bool is_system_stable = dynamical::analysis::is_stable(plant, feedback);
+    if (is_system_stable) {
+      std::cout << "stable system determined, running sim...\n";
+      ++stable_systems_generated;  // avoiding adding bools (unsigned) to ints
+    } else {
+      std::cout << "unstable system determined, running sim...\n";
+    }
+
+    for (int step = 0; step != 1000; ++step) {
+      plant.Update(feedback.GetU(plant.GetX()));
+      //   std::cout << "plant state at step " << step << ":\n"
+      //             << plant.GetX() << '\n';
+    }
+
+    std::cout << "plant state after 100 steps:\n";
+    std::cout << plant.GetX() << "\n\n";
+
+    ASSERT_EQ(is_system_stable,
+              test_utils::check_matrix_equality(
+                  DiscretePlant::x_VectorType::Zero(), plant.GetX(), 0.01));
+  }
+
+  std::cout << "========================\n";
+  std::cout << "TEST END\n";
+  std::cout << "number of controllable systems generated: "
+            << controllable_systems_generated << '\n';
+  std::cout << "number of stable systems generated: "
+            << stable_systems_generated << "\n\n";
 }
 
 // TODO: before implementing this, test
 // plant_test.cpp/PropagateContinuousDynamics
 TEST(Stability, Continuous_Fuzzed_Sim) {
-  // multiple tests with random matrices, comparing the result of is_stable
+  // Multiple tests with random matrices, comparing the result of is_stable
   // function against simulations with extended number of steps.
 }
 
@@ -286,7 +357,7 @@ TEST(Stability, Continuous_Fuzzed_Sim) {
 /* ============================ */
 
 TEST(Discretization, Dynamics_NoInput) {
-  // example 1: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
+  // Example 1: https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
@@ -323,7 +394,7 @@ TEST(Discretization, Dynamics_NoInput) {
 }
 
 TEST(Discretization, Dynamics_NoInput_Fuzzed) {
-  // this test takes advantage of the property that eigenvalues of a continuous
+  // This test takes advantage of the property that eigenvalues of a continuous
   // system always end up in the exponent of its discretized version.
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
@@ -334,15 +405,15 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
                                std::complex<double>>;
 
   for (int i = 0; i != 20; ++i) {
-    ContinuousPlant::A_MatrixType test_A =
+    ContinuousPlant::A_MatrixType random_A =
         ContinuousPlant::A_MatrixType::Random();
-    ContinuousPlant::B_MatrixType test_B =
+    ContinuousPlant::B_MatrixType zero_B =
         ContinuousPlant::B_MatrixType::Zero();
     ContinuousPlant::x_VectorType x_initial =
         ContinuousPlant::x_VectorType::Random();
 
-    ContinuousPlant continuous_plant(x_initial, test_A, test_B);
-    ContinuousPlant continuous_plant_doubled(x_initial, test_A * 2, test_B);
+    ContinuousPlant continuous_plant(x_initial, random_A, zero_B);
+    ContinuousPlant continuous_plant_doubled(x_initial, random_A * 2, zero_B);
 
     // making sure it works for all kinds of values of dt
     for (double dt = 2; dt > 0.001; dt /= 2) {
@@ -359,7 +430,7 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
 
 // TODO: finish this
 TEST(Discretization, SISO) {
-  // problem 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob12.pdf
+  // Problem 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob12.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =

@@ -1,6 +1,6 @@
 # Design document
 
-This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It's admittedly pretty pedantic :)
+This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It admittedly got pretty pedantic :0
 
 
 ## Some driving design goals
