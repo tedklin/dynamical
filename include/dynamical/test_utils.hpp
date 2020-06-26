@@ -6,7 +6,7 @@
 #include "Eigen/Dense"
 
 namespace testing {
-namespace test_utils {
+namespace dynamical_test_utils {
 
 bool check_matrix_equality(Eigen::MatrixXd expected, Eigen::MatrixXd actual,
                            double tolerance = 1e-9) {
@@ -52,5 +52,5 @@ bool check_complex_matrix_equality(Eigen::MatrixXcd expected,
   return true;
 }
 
-}  // namespace test_utils
+}  // namespace dynamical_test_utils
 }  // namespace testing

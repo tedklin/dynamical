@@ -73,10 +73,14 @@ TEST(Plant, PropagateDiscreteDynamics) {
         controllability_matrix.inverse() *
         (x_target - (plant.A_ * plant.A_ * x_initial));
 
-    ASSERT_TRUE(test_utils::check_matrix_equality(x_initial, plant.GetX()));
+    ASSERT_TRUE(
+        dynamical_test_utils::check_matrix_equality(x_initial, plant.GetX()));
+
     plant.Update(inverted_input_sequence.row(1));
     plant.Update(inverted_input_sequence.row(0));
-    ASSERT_TRUE(test_utils::check_matrix_equality(x_target, plant.GetX()));
+
+    ASSERT_TRUE(
+        dynamical_test_utils::check_matrix_equality(x_target, plant.GetX()));
 
     // std::cout << "===============\n";
     // std::cout << "Test #" << i << '\n';

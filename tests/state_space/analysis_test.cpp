@@ -41,7 +41,7 @@ TEST(Controllability, SISO_ControllabilityMatrix) {
   manual_controllability_matrix << /*[[*/ 0, 1 /*]*/,
       /*[*/ 1, 2 /*]]*/;
 
-  ASSERT_TRUE(test_utils::check_matrix_equality(
+  ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
       manual_controllability_matrix, calculated_controllability_matrix));
 }
 
@@ -71,7 +71,7 @@ TEST(Controllability, MIMO_ControllabilityMatrix) {
   manual_controllability_matrix << /*[[*/ 0, 1, 1, 2 /*]*/,
       /*[*/ 1, 1, 2, 2 /*]]*/;
 
-  ASSERT_TRUE(test_utils::check_matrix_equality(
+  ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
       manual_controllability_matrix, calculated_controllability_matrix));
 }
 
@@ -333,7 +333,7 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
     std::cout << plant.GetX() << "\n\n";
 
     ASSERT_EQ(is_system_stable,
-              test_utils::check_matrix_equality(
+              dynamical_test_utils::check_matrix_equality(
                   DiscretePlant::x_VectorType::Zero(), plant.GetX(), 0.01));
   }
 
@@ -388,8 +388,8 @@ TEST(Discretization, Dynamics_NoInput) {
     expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
         /*[*/ std::sin(dt), std::cos(dt) /*]]*/;
 
-    ASSERT_TRUE(test_utils::check_complex_matrix_equality(expected_A,
-                                                          discrete_plant.A_));
+    ASSERT_TRUE(dynamical_test_utils::check_complex_matrix_equality(
+        expected_A, discrete_plant.A_));
   }
 }
 
@@ -422,7 +422,7 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
       DiscretePlant discrete_plant_doubled =
           dynamical::analysis::discretize(continuous_plant_doubled, dt);
 
-      ASSERT_TRUE(test_utils::check_complex_matrix_equality(
+      ASSERT_TRUE(dynamical_test_utils::check_complex_matrix_equality(
           discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_));
     }
   }
