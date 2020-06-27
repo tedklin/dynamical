@@ -1,6 +1,6 @@
 # Design document
 
-This living document is intended to lay out software design decisions and non-obvious code. Since *dynamical* is my first larger-scale C++ project, I decided it's best to expose the reasoning behind even trivial design decisions made. This is for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It admittedly got pretty pedantic :0
+This living document is intended to lay out some design decisions and non-obvious code. It's for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design.
 
 
 ## Some driving design goals
@@ -13,16 +13,13 @@ This living document is intended to lay out software design decisions and non-ob
     - Tests! Lots of tests!
 2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
-        - e.g. each block type in a typical control system diagram should be its own class.
     - Levels of functionality based on external dependencies and other overhead.
         - Each level of functionality should work on its own and not be too entangled with higher levels of functionality, especially ones that introduce external dependencies.
-        - Prefer to define non-core functionality as generic functions that act on a given object instead of member functions contained within each object.
+        - Prefer to define non-core functionality as generic functions that act on a given object instead of member functions contained within each core object.
 3. Efficiency
     - Optimizations like enabling move operations where it makes sense.
         - Keep in mind optimizations the compiler itself can make too, like copy elision / RVO.
     - Learn how to use tools like sanitizers and profilers. 
-4. Application-focused
-    - Keep in mind the applications a library like this could be used for, and design around that.
 
 
 ## Levels of functionality
@@ -30,26 +27,27 @@ This living document is intended to lay out software design decisions and non-ob
 1. Real-time discrete and "continuous" (with onboard discretization) linear control systems
 2. Linear systems analysis
 4. Real-time nonlinear control systems (onboard linearization)
-4. Built-in calculations for optimal control (LQR, etc.)
+4. Integrated solvers and implementations for optimal control (LQR, MPC, etc.)
 
 
 ## High-level TODOs
-- TEMPLATES. ARE. EVERYWHERE.
+- TEMPLATES ARE EVERYWHERE
     - TODO: how to make this cleaner???????
 - The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large.
     - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
     - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
     - TODO: read up on return value optimization to see if this is really a problem at all.
-        - i understand copy elision, but when a function returns a local object by value, does it do so by copying or does it implictly use move?
-        - **this question extends to a lot of my currently implemented code.**
+        - i think i understand copy elision to eliminate the copy action into the temporary, but it seems like there's still a copy-assign happening at the call site. when a function returns a local object by value, is there a way to just directly use move semantics? or does the compiler do that implicitly?
     - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
 - Some of the decisions I'm making are taking into heavy consideration possible usage with my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). This might result in some features that don't make sense for real world systems.
     - TODO: decide if satisfying 16B constraints is really worth it.
 
 
 ## High-level design notes
-- Most of the math is implemented with techniques we learned in 16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). However, there are some clashes in convention between the two sources:
+- Most of the math is implemented with techniques we learned in EECS16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some clashes in convention between the two sources:
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
+    - A&M notes that it prefers "reachability" to "controllability", and they're technically not the same thing, but in the context of 16B they're the same thing and we use the term "controllability".
+    - 
 
 
 ## File-by-file implementation details
@@ -75,7 +73,7 @@ This living document is intended to lay out software design decisions and non-ob
         - I don't have much experience with implementation of state-space controllers in practice, so I don't really know if this was the best decision. The considerations I took for the design of the constructor(s) for this class are as follows:
             - In EECS16B, the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
                 - This is also why the template parameter num_outputs has a default argument of num_states.
-            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicitly defined C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). I haven't seen as strong of a need for an explicit D matrix (and it seems like it reduces some computations), so there may be many cases where only A, B, and C are defined.
+            - The [Wikipedia page for state-space controllers](https://en.wikipedia.org/wiki/State-space_representation) also notes that C and D are fairly commonly defaulted to the identity and zero matrices in practice. However, from my own personal observations (videos, papers, other code) it seems as if an explicitly defined C is often pretty necessary (we often can't measure states directly due to feasibility / cost constraints). I haven't seen as strong of a need for an explicit D matrix (and D=Zero seems like it reduces some computations), so there may be many cases where only A, B, and C are defined.
             - It is more common to need to specify a nonzero initial state vector x than to define C and D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
                 - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
 - copy-control.
@@ -94,7 +92,6 @@ This living document is intended to lay out software design decisions and non-ob
 - TODO: explore accuracy / efficiency of integration methods.
 - TODO: implement Update() as real-time update?
     - std::chrono
-        - https://stackoverflow.com/questions/728068/how-to-calculate-a-time-difference-in-c
         - https://en.cppreference.com/w/cpp/chrono/duration
         - https://en.cppreference.com/w/cpp/chrono/time_point
 
@@ -122,6 +119,7 @@ overall notes
 *get_observability_matrix*
 - *namespace dynamical::analysis*
 - *type: template function*
+- TODO: calculations seem to be similar to controllability matrix, make a common helper function?
 
 *is_observable*
 - *namespace dynamical::analysis*
@@ -135,7 +133,7 @@ overall notes
 - *namespace dynamical::analysis*
 - *type: template function*
 - TODO: figure out if four overloads for this method is really necessary.
-    - but don't cut down on overloads if it means losing guarantees on correctness.
+    - but don't cut down on overloads if it means losing guarantees on correctness and safety.
 
 *discretize*
 - *namespace dynamical::analysis*

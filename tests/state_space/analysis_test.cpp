@@ -428,7 +428,7 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
   }
 }
 
-// TODO: finish this
+// TODO: check this by hand
 TEST(Discretization, SISO) {
   // Problem 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob12.pdf
 
