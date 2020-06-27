@@ -2,10 +2,10 @@
 
 #include "dynamical/state_space/controller.hpp"
 #include "dynamical/state_space/plant.hpp"
+#include "dynamical/utils/exception.hpp"
 
 #include <cmath>
 #include <iostream>  // TODO: remove or keep diagnostic prints?
-#include <stdexcept>
 
 namespace dynamical {
 namespace analysis {
@@ -142,15 +142,13 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
   // A_eigenbasis.computeInverseWithCheck(A_eigenbasis_inverse,
   //                                      A_eigenbasis_invertible);
   // if (!A_eigenbasis_invertible) {
-  //   throw std::runtime_error(
-  //       "(dynamical) Discretization error: eigenbasis not invertible.");
+  //   throw dynamical_error("discretization: eigenbasis not invertible.");
   // }
 
   // eigen-3.3.4 (default installation with apt)
   Eigen::FullPivLU<decltype(A_eigenbasis)> lu(A_eigenbasis);
   if (!lu.isInvertible()) {
-    throw std::runtime_error(
-        "(dynamical) Discretization error: eigenbasis not invertible.");
+    throw dynamical_error("discretization: eigenbasis not invertible.");
   }
   A_eigenbasis_inverse = A_eigenbasis.inverse();
 

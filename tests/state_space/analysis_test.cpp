@@ -430,7 +430,7 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
 }
 
 TEST(Discretization, SimpleSecondOrder) {
-  // An example of a system that can't be solved by discretization.
+  // An example of a system that can't be solved by diagonlization.
   // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 2;
@@ -455,7 +455,6 @@ TEST(Discretization, SimpleSecondOrder) {
 
   ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
-  // TODO: change this to dynamical exception
   ASSERT_THROW(dynamical::analysis::discretize(continuous_plant, 0.01),
                std::runtime_error);
 }
