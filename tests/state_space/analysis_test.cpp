@@ -389,8 +389,8 @@ TEST(Discretization, Dynamics_NoInput) {
     expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
         /*[*/ std::sin(dt), std::cos(dt) /*]]*/;
 
-    ASSERT_TRUE(dynamical_test_utils::check_complex_matrix_equality(
-        expected_A, discrete_plant.A_));
+    ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(expected_A,
+                                                            discrete_plant.A_));
   }
 }
 
@@ -423,8 +423,9 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
       DiscretePlant discrete_plant_doubled =
           dynamical::analysis::discretize(continuous_plant_doubled, dt);
 
-      ASSERT_TRUE(dynamical_test_utils::check_complex_matrix_equality(
-          discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_));
+      ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
+          discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_,
+          1e-5));
     }
   }
 }
@@ -440,12 +441,11 @@ TEST(Discretization, SimpleSecondOrder) {
       dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
                                std::complex<double>>;
 
-  double R = 9.71, M = 1.678;
-
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1 /*]*/,
       /*[*/ 0, 0 /*]]*/;
 
+  constexpr double R = 9.71, M = 1.678;
   ContinuousPlant::B_MatrixType test_B;
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1.0 / R * M /*]]*/;
@@ -462,6 +462,7 @@ TEST(Discretization, SimpleSecondOrder) {
 // TODO: check this by hand
 TEST(Discretization, SISO) {
   // Problem 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob12.pdf
+  // Checked by hand.
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
@@ -483,8 +484,19 @@ TEST(Discretization, SISO) {
 
   ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
+  DiscretePlant::A_MatrixType expected_A;
+  expected_A << /*[[*/ 0.99094, 0.08610 /*]*/,
+      /*[*/ -0.17221, 0.73262 /*]]*/;
+
+  DiscretePlant::B_MatrixType expected_B;
+  test_B << /*[[*/ 0.00905 /*]*/,
+      /*[*/ 0.17221 /*]]*/;
+
   DiscretePlant discrete_plant =
-      dynamical::analysis::discretize(continuous_plant, 0.01);
+      dynamical::analysis::discretize(continuous_plant, 0.1);
+
+  ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
+      expected_A, discrete_plant.A_, 1e-5));
 }
 
 // TODO: implement this

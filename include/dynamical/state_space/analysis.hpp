@@ -5,6 +5,7 @@
 #include "dynamical/utils/exception.hpp"
 
 #include <cmath>
+#include <complex>
 #include <iostream>  // TODO: remove or keep diagnostic prints?
 
 namespace dynamical {

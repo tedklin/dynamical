@@ -97,6 +97,34 @@ TEST(Plant, PropagateDiscreteDynamics) {
 TEST(Plant, PropagateContinuousDynamics_Sim) {
   // Compare the accuracy of runge-kutta against a model that was discretized by
   // diagonalization.
+
+  constexpr int num_states = 3, num_inputs = 1, num_outputs = 3;
+  using ContinuousPlant =
+      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+  using DiscretePlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
+                               std::complex<double>>;
+
+  for (int i = 0; i != 50; ++i) {
+    ContinuousPlant continuous_plant(ContinuousPlant::x_VectorType::Random(),
+                                     ContinuousPlant::A_MatrixType::Random(),
+                                     ContinuousPlant::B_MatrixType::Random());
+
+    constexpr double dt = 0.01;
+
+    DiscretePlant discrete_plant =
+        dynamical::analysis::discretize(continuous_plant, dt);
+
+    for (int step = 0; step != 1000; ++step) {
+      ContinuousPlant::u_VectorType u_cont =
+          ContinuousPlant::u_VectorType::Random();
+      continuous_plant.UpdateSim(u_cont, dt);
+      discrete_plant.Update(u_cont);
+    }
+
+    std::cout << continuous_plant.GetX() << "\n\n";
+    std::cout << discrete_plant.GetX() << "\n\n";
+  }
 }
 
 TEST(Plant, PropagateContinuousDynamics_RT) {
