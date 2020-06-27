@@ -92,9 +92,16 @@ TEST(Plant, PropagateDiscreteDynamics) {
   }
 }
 
-// TODO: before implementing this, test runge kutta in integration_test.cpp
-TEST(Plant, PropagateContinuousDynamics_Sim) {}
+// note: this is doubling as a proxy test for
+// dynamical::numerical::integral:rk4() for now.
+TEST(Plant, PropagateContinuousDynamics_Sim) {
+  // Compare the accuracy of runge-kutta against a model that was discretized by
+  // diagonalization.
+}
 
-TEST(Plant, PropagateContinuousDynamics_RT) {}
+TEST(Plant, PropagateContinuousDynamics_RT) {
+  // IRL, we would probably gather a bunch of data from the actual continuous
+  // system (if we could) and test the discretized model against that.
+}
 
 }  // namespace testing

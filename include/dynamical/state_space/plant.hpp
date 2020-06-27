@@ -76,8 +76,11 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
   // TODO: implement this real-time?
+  // map to discretized plants? or UpdateSim?
   void Update(const u_VectorType& u) override {}
 
+  // runge kutta with zero-order hold
+  // https://math.stackexchange.com/questions/2946737/
   void UpdateSim(const u_VectorType& u, double dt) {
     // https://en.cppreference.com/w/cpp/language/lambda#Lambda_capture
     this->x_ = numerical::integral::rk4(

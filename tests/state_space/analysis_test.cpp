@@ -459,8 +459,4 @@ TEST(Discretization, SISO) {
 // TODO: implement this
 TEST(Discretization, MIMO) {}
 
-// TODO: compare discretization against the parent continuous system's Update
-// function?
-TEST(Discretization, Sim_Fuzzed) {}
-
 }  // namespace testing

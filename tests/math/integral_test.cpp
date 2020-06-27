@@ -8,19 +8,22 @@
 namespace testing {
 
 TEST(Integration, RK4Scalar) {
-  // we know the function dy_dt(y) (this is what's inside the lambda)
-  // we also know y0 at some time t0.
-  // runge kutta gives y1, which is y(t0 + dt)
-
-  // remember we deal with linear time-invariant systems, so dy/dt should only
-  // depend on y, not t.
-  // but then what parameter does y take (if not time) and how can we test
-  // this???
-
-  // double result = dynamical::numerical::integral::rk4(
-  //     [](const double& x) -> double { return std::exp(x); }, 2.0, 0.01);
+  double result = dynamical::numerical::integral::rk4(
+      [](const double& x) -> double { return std::exp(x); }, 2.0, 0.01);
 }
 
-TEST(Integration, RK4Vector) {}
+TEST(Integration, RK4Vector) {
+  // mock continuous-time plant
+  const Eigen::Matrix2d A = Eigen::Matrix2d::Random();
+  const Eigen::Matrix2d B = Eigen::Matrix2d::Random();
+  const Eigen::Vector2d curr_x = Eigen::Vector2d::Random();
+  const Eigen::Vector2d u = Eigen::Vector2d::Random();
+
+  Eigen::Vector2d result = dynamical::numerical::integral::rk4(
+      [&](const Eigen::Vector2d& x) -> Eigen::Vector2d {
+        return A * x + B * u;
+      },
+      curr_x, 0.01);
+}
 
 }  // namespace testing
