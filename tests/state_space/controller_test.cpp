@@ -1,7 +1,7 @@
 #include "dynamical/state_space/controller.hpp"
 
 #include "dynamical/state_space/plant.hpp"
-#include "dynamical/test_utils.hpp"
+#include "dynamical/utils/test_utils.hpp"
 
 #include <iostream>
 

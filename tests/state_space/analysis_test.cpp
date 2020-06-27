@@ -1,10 +1,11 @@
 #include "dynamical/state_space/analysis.hpp"
 
 #include "dynamical/state_space/plant.hpp"
-#include "dynamical/test_utils.hpp"
+#include "dynamical/utils/test_utils.hpp"
 
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
@@ -426,6 +427,37 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
           discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_));
     }
   }
+}
+
+TEST(Discretization, SimpleSecondOrder) {
+  // An example of a system that can't be solved by discretization.
+  // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
+
+  constexpr int num_states = 2, num_inputs = 1, num_outputs = 2;
+  using ContinuousPlant =
+      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+  using DiscretePlant =
+      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
+                               std::complex<double>>;
+
+  double R = 9.71, M = 1.678;
+
+  ContinuousPlant::A_MatrixType test_A;
+  test_A << /*[[*/ 0, 1 /*]*/,
+      /*[*/ 0, 0 /*]]*/;
+
+  ContinuousPlant::B_MatrixType test_B;
+  test_B << /*[[*/ 0 /*]*/,
+      /*[*/ 1.0 / R * M /*]]*/;
+
+  ContinuousPlant::x_VectorType x_initial =
+      ContinuousPlant::x_VectorType::Random();
+
+  ContinuousPlant continuous_plant(x_initial, test_A, test_B);
+
+  // TODO: change this to dynamical exception
+  ASSERT_THROW(dynamical::analysis::discretize(continuous_plant, 0.01),
+               std::runtime_error);
 }
 
 // TODO: check this by hand
