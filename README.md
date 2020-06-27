@@ -4,7 +4,9 @@
 
 *This project is still very much a WIP.*
 
-*DynamiCal* was born out of a desire to solidify concepts learned in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), with a focus on the controls aspect of the course. I plan to extend it to include concepts from other classes in this domain as well when I take them. *DynamiCal* aims to be both educational and applicable, with an intuitive interface and performance-driven design.
+*DynamiCal* was born out of a desire to solidify concepts learned in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), with a focus on the controls aspect of the course. I plan to extend it to include concepts from other classes in this domain as well when I take them.
+
+*DynamiCal* aims to be both educational and applicable, with an intuitive interface and performance-driven design. Specific examples have not been created yet, but the [tests](https://github.com/tedklin/dynamical/tree/master/tests) show basic usage.
 
 
 ## References

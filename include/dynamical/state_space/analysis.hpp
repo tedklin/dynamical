@@ -53,7 +53,8 @@ template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_observable(
     const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {}
 
-// TODO: remove or keep diagnostic prints?
+// TODO: extend to continuous systems with zero-real-part eigenvalues (see
+// Jordan normal form).
 template <typename Scalar, int state_dim>
 bool stability_helper(
     const Eigen::Matrix<Scalar, state_dim, state_dim>& dynamics_matrix,
@@ -80,7 +81,8 @@ bool stability_helper(
   return true;
 }
 
-// TODO: consider type identification (tricky with templates, use std::issame)
+// TODO: consider type identification to cut down number of function overloads
+// (tricky with templates, use std::issame)
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(
     const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
@@ -107,7 +109,7 @@ bool is_stable(
     const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
         continuous_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
-  std::cout << "running continuous stability check...\n\n";
+  // std::cout << "running continuous stability check...\n\n";
 
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       continuous_plant.A_ + continuous_plant.B_ * feedback.GetK();
@@ -123,7 +125,6 @@ bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
   return stability_helper(continuous_plant.A_, false);
 }
 
-// TODO: remove or keep diagnostic prints?
 // discretization by diagonalization
 // the returned discrete model has complex Scalar type std::complex<double>
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf

@@ -270,8 +270,13 @@ TEST(Stability, Continuous_Stable) {
 }
 
 TEST(Stability, Discrete_Fuzzed_Sim) {
-  // Multiple tests with random matrices, comparing the result of is_stable
-  // function against simulations with extended number of steps.
+  // Multiple tests with discrete systems generated from random matrices.
+  // The result of the is_stable function is compared against simulations with
+  // extended number of steps.
+
+  // This was only done with discrete systems because I haven't found a good way
+  // to *guarantee* randomly generated A, B, and K matrices always giving us
+  // nice continuous systems (eigenvalues with high norms).
 
   constexpr int num_states = 3, num_inputs = 2;
   using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
@@ -281,11 +286,12 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
 
   for (int i = 0; i != 50; ++i) {
     std::cout << "========================\n";
-    std::cout << "test #" << i << ":\n\n";
+    std::cout << "discrete stability test #" << i << ":\n\n";
 
     // Eigen's random generates floating point numbers in the range (-1.0, 1.0).
-    // To increase the chances of generating a stable system, we make the plant
-    // matrices strictly positive and the feedback matrices strictly negative.
+    // To balance the chances of generating a stable discrete system, we make
+    // the plant matrices strictly positive and the feedback matrix strictly
+    // negative.
     DiscretePlant::A_MatrixType random_A =
         DiscretePlant::A_MatrixType::Random().cwiseAbs() * 1.2;
     DiscretePlant::B_MatrixType random_B =
@@ -330,7 +336,7 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
       //             << plant.GetX() << '\n';
     }
 
-    std::cout << "plant state after 100 steps:\n";
+    std::cout << "plant state after 1000 steps:\n";
     std::cout << plant.GetX() << "\n\n";
 
     ASSERT_EQ(is_system_stable,
@@ -344,13 +350,6 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
             << controllable_systems_generated << '\n';
   std::cout << "number of stable systems generated: "
             << stable_systems_generated << "\n\n";
-}
-
-// TODO: before implementing this, test
-// plant_test.cpp/PropagateContinuousDynamics
-TEST(Stability, Continuous_Fuzzed_Sim) {
-  // Multiple tests with random matrices, comparing the result of is_stable
-  // function against simulations with extended number of steps.
 }
 
 /* ============================ */
@@ -459,7 +458,6 @@ TEST(Discretization, SimpleSecondOrder) {
                std::runtime_error);
 }
 
-// TODO: check this by hand
 TEST(Discretization, SISO) {
   // Problem 2: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob12.pdf
   // Checked by hand.

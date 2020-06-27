@@ -5,6 +5,12 @@
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 
+// NOTE: the tests in this file that are currently implemented are ONLY for
+// checking the function matching capabilities of the runge-kutta
+// implementation. A test that actually checks the effectiveness of runge-kutta
+// in the context of estimating continuous-time dynamics can be found in
+// state_space/plant_test.cpp.
+
 namespace testing {
 
 TEST(Integration, RK4Scalar) {
