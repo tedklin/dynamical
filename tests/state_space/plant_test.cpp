@@ -122,8 +122,9 @@ TEST(Plant, PropagateContinuousDynamics_Sim) {
       discrete_plant.Update(u_cont);
     }
 
-    std::cout << continuous_plant.GetX() << "\n\n";
-    std::cout << discrete_plant.GetX() << "\n\n";
+    // big tolerance because we've taken 1000 steps lol
+    ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
+        discrete_plant.GetX(), continuous_plant.GetX(), 1e-2));
   }
 }
 
