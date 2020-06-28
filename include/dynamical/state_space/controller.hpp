@@ -18,10 +18,10 @@ class Feedback {
   using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
   // K_ref matrix dimensions are different than K if our reference signal is not
-  // full state, but we should be able to just avoid this by ensuring our
-  // trajectories give reference signals that are full state.
+  // full state, but we should be able to avoid differentiating between the two
+  // by ensuring our trajectories output reference signals with the appropriate
+  // dimensions.
   using K_MatrixType = Eigen::Matrix<Scalar, input_dim, state_dim>;
-  // using Kref_MatrixType = Eigen::Matrix<Scalar, input_dim, state_dim>;
 
   explicit Feedback(const K_MatrixType& K,
                     const K_MatrixType& K_ref = K_MatrixType::Zero())
