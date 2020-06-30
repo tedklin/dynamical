@@ -21,7 +21,7 @@ bool check_matrix_equality(Eigen::MatrixXcd expected, Eigen::MatrixXcd actual,
   for (int col = 0; col != expected.cols(); ++col) {
     for (int row = 0; row != expected.rows(); ++row) {
       if (std::abs(expected(row, col) - actual(row, col)) > tolerance) {
-        std::cout << "matrix equality check: expected\n"
+        std::cerr << "matrix equality check: expected\n"
                   << expected(row, col) << "\n\nbut got\n"
                   << actual(row, col) << "\n\n";
         return false;

@@ -160,6 +160,12 @@ TEST(Controllability, MIMO_Uncontrollable) {
   ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
 }
 
+/* =========================== */
+/* === OBSERVABILITY TESTS === */
+/* =========================== */
+
+// TODO: test get_observability_matrix and is_observable
+
 /* ======================= */
 /* === STABILITY TESTS === */
 /* ======================= */

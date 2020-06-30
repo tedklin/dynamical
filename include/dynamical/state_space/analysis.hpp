@@ -42,16 +42,40 @@ bool is_controllable(
   return rank >= state_dim;
 }
 
-// TODO: implement get_observability_matrix
+// TODO: test
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_observability_matrix(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant,
-    int num_steps_allowed = state_dim) {}
+Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>
+get_observability_matrix(
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+  Eigen::Matrix<Scalar, output_dim * state_dim, state_dim> observability_matrix;
+  Eigen::Matrix<Scalar, output_dim, state_dim> step_block = plant.C_;
 
-// TODO: implement is_observable
+  for (int step = 0; step != state_dim; ++step) {
+    for (int block_index = 0; block_index != output_dim; ++block_index) {
+      int observability_row = (step * output_dim) + block_index;
+      observability_matrix.row(observability_row) = step_block.row(block_index);
+    }
+    step_block = step_block * plant.A_;
+  }
+  return observability_matrix;
+}
+
+// TODO: test
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_observable(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {}
+    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+  Eigen::FullPivLU<decltype(plant.C_)> lu(plant.C_);
+  if (lu.isInvertible()) {
+    return true;
+  }
+
+  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> observability_matrix =
+      get_observability_matrix(plant);
+  Eigen::ColPivHouseholderQR<decltype(observability_matrix)> qr_decomp(
+      observability_matrix);
+  auto rank = qr_decomp.rank();
+  return rank >= state_dim;
+}
 
 // TODO: extend to continuous systems with zero-real-part eigenvalues (see
 // Jordan normal form).
