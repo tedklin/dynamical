@@ -61,8 +61,8 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
 
   void Update(const u_VectorType& u) override {
-    this->x_ = this->A_ * this->x_ + this->B_ * u;
     this->y_ = this->C_ * this->x_ + this->D_ * u;
+    this->x_ = this->A_ * this->x_ + this->B_ * u;
   }
 };
 
@@ -82,13 +82,12 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   // runge kutta with zero-order hold
   // https://math.stackexchange.com/questions/2946737/
   void UpdateSim(const u_VectorType& u, double dt) {
+    this->y_ = this->C_ * this->x_ + this->D_ * u;
     this->x_ = numerical::integral::rk4(
         [&](const x_VectorType& x) -> x_VectorType {
           return this->A_ * x + this->B_ * u;
         },
         this->x_, dt);
-
-    this->y_ = this->C_ * this->x_ + this->D_ * u;
   }
 };
 

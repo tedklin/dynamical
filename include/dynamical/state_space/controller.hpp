@@ -45,10 +45,52 @@ class Feedback {
   K_MatrixType K_ref_;
 };
 
+// currently only supports discrete-time systems!
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
 class Observer {
-  // TODO: implement
+ public:
+  // TODO: figure out how to forward types from a completely unrelated template
+  // (in this case, Plant<..>)
+  using A_MatrixType = Eigen::Matrix<Scalar, state_dim, state_dim>;
+  using B_MatrixType = Eigen::Matrix<Scalar, state_dim, input_dim>;
+  using C_MatrixType = Eigen::Matrix<Scalar, output_dim, state_dim>;
+  using D_MatrixType = Eigen::Matrix<Scalar, output_dim, input_dim>;
+  using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
+  using y_VectorType = Eigen::Matrix<Scalar, output_dim, 1>;
+  using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
+
+  using L_MatrixType = Eigen::Matrix<Scalar, state_dim, output_dim>;
+
+  Observer() = delete;
+
+  Observer(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>& plant,
+           const L_MatrixType& L,
+           const x_VectorType& x_hat_initial = x_VectorType::Zero())
+      : A_(plant.A_),
+        B_(plant.B_),
+        C_(plant.C_),
+        D_(plant.D_),
+        L_(plant.L_),
+        x_hat_(x_hat_initial) {}
+
+  void Update(const y_VectorType& y, const u_VectorType& u) {
+    y_hat_ = C_ * x_hat_ + D_ * u;
+    x_hat_ = A_ * x_hat_ + B_ * u + L * (y - y_hat_);
+  }
+
+  const x_VectorType& GetX_hat() const { return x_hat_; }
+
+  const A_MatrixType A_;
+  const B_MatrixType B_;
+  const C_MatrixType C_;
+  const D_MatrixType D_;
+
+  const L_MatrixType L_;
+
+ protected:
+  x_VectorType x_hat_;
+  y_VectorType y_hat_ = y_VectorType::Zero();
 };
 
 template <int state_dim, int input_dim, int output_dim = state_dim,

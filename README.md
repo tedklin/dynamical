@@ -4,10 +4,15 @@
 
 *This project is still very much a WIP.*
 
-*DynamiCal* was born out of a desire to solidify concepts taught in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), with a focus on the controls aspect of the course. It's evolved a little beyond the scope of 16B, as I started using the Astrom and Murray *Feedback Systems* text to self-study. I also plan to add concepts from other relevant classes I take.
+*DynamiCal* is a control systems framework that aims to be both educational and applicable, with an intuitive interface and performance-driven design in C++.
 
-*DynamiCal* aims to be both educational and applicable, with an intuitive interface and performance-driven design. Specific examples and formal documentation have not been created yet, but the [tests](https://github.com/tedklin/dynamical/tree/master/tests) might give a basic idea of general usage.
+*DynamiCal* was born out of a desire to solidify concepts taught in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)), with a focus on the controls aspect of the course. It's evolved a little beyond the scope of 16B, as I started using the Astrom and Murray *Feedback Systems* text to self-study. I also plan to add concepts from other relevant classes I take down the road.
 
+Specific examples and formal documentation have not been created yet, but the [tests](https://github.com/tedklin/dynamical/tree/master/tests) might give a basic idea of general usage.
+
+
+## Dependencies
+- [Eigen3](http://eigen.tuxfamily.org/index.php?title=Main_Page)
 
 ## References
 
