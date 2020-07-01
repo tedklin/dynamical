@@ -45,7 +45,7 @@ class Feedback {
   K_MatrixType K_ref_;
 };
 
-// currently only supports discrete-time systems!
+// Currently only supports discrete-time systems
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
 class Observer {
@@ -76,7 +76,7 @@ class Observer {
 
   void Update(const y_VectorType& y, const u_VectorType& u) {
     y_hat_ = C_ * x_hat_ + D_ * u;
-    x_hat_ = A_ * x_hat_ + B_ * u + L * (y - y_hat_);
+    x_hat_ = A_ * x_hat_ + B_ * u + L_ * (y - y_hat_);
   }
 
   const x_VectorType& GetX_hat() const { return x_hat_; }
