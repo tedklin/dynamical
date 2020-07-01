@@ -9,6 +9,7 @@
 #include <iostream>  // TODO: remove or keep diagnostic prints?
 
 namespace dynamical {
+namespace lti {
 namespace analysis {
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
@@ -214,4 +215,5 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
 }
 
 }  // namespace analysis
+}  // namespace lti
 }  // namespace dynamical

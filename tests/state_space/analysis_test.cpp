@@ -21,7 +21,7 @@ TEST(Controllability, SISO_ControllabilityMatrix) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
@@ -36,7 +36,7 @@ TEST(Controllability, SISO_ControllabilityMatrix) {
   SISOPlant plant(x_initial, test_A, test_B);
 
   Eigen::MatrixXd calculated_controllability_matrix =
-      dynamical::analysis::get_controllability_matrix(plant);
+      dynamical::lti::analysis::get_controllability_matrix(plant);
 
   Eigen::MatrixXd manual_controllability_matrix(2, 2);
   manual_controllability_matrix << /*[[*/ 0, 1 /*]*/,
@@ -51,7 +51,7 @@ TEST(Controllability, MIMO_ControllabilityMatrix) {
 
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   MIMOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
@@ -66,7 +66,7 @@ TEST(Controllability, MIMO_ControllabilityMatrix) {
   MIMOPlant plant(x_initial, test_A, test_B);
 
   Eigen::MatrixXd calculated_controllability_matrix =
-      dynamical::analysis::get_controllability_matrix(plant);
+      dynamical::lti::analysis::get_controllability_matrix(plant);
 
   Eigen::MatrixXd manual_controllability_matrix(2, 4);
   manual_controllability_matrix << /*[[*/ 0, 1, 1, 2 /*]*/,
@@ -81,7 +81,7 @@ TEST(Controllability, SISO_Controllable) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
@@ -95,7 +95,7 @@ TEST(Controllability, SISO_Controllable) {
 
   SISOPlant plant(x_initial, test_A, test_B);
 
-  ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
+  ASSERT_TRUE(dynamical::lti::analysis::is_controllable(plant));
 }
 
 TEST(Controllability, SISO_Uncontrollable) {
@@ -103,7 +103,7 @@ TEST(Controllability, SISO_Uncontrollable) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   SISOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 1 /*]*/,
@@ -117,7 +117,7 @@ TEST(Controllability, SISO_Uncontrollable) {
 
   SISOPlant plant(x_initial, test_A, test_B);
 
-  ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
+  ASSERT_FALSE(dynamical::lti::analysis::is_controllable(plant));
 }
 
 TEST(Controllability, MIMO_Controllable) {
@@ -127,7 +127,7 @@ TEST(Controllability, MIMO_Controllable) {
 
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   MIMOPlant::A_MatrixType random_A = MIMOPlant::A_MatrixType::Random();
   MIMOPlant::B_MatrixType random_B = MIMOPlant::B_MatrixType::Random();
@@ -135,7 +135,7 @@ TEST(Controllability, MIMO_Controllable) {
 
   MIMOPlant plant(x_initial, random_A, random_B);
 
-  ASSERT_TRUE(dynamical::analysis::is_controllable(plant));
+  ASSERT_TRUE(dynamical::lti::analysis::is_controllable(plant));
 }
 
 TEST(Controllability, MIMO_Uncontrollable) {
@@ -143,7 +143,7 @@ TEST(Controllability, MIMO_Uncontrollable) {
 
   constexpr int num_states = 2, num_inputs = 2, num_outputs = 2;
   using MIMOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   MIMOPlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 0 /*]*/,
@@ -157,7 +157,7 @@ TEST(Controllability, MIMO_Uncontrollable) {
 
   MIMOPlant plant(x_initial, test_A, test_B);
 
-  ASSERT_FALSE(dynamical::analysis::is_controllable(plant));
+  ASSERT_FALSE(dynamical::lti::analysis::is_controllable(plant));
 }
 
 /* =========================== */
@@ -174,7 +174,7 @@ TEST(Stability, Discrete_Unstable) {
   // Random numbers, checked by hand.
 
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = 3
-  using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
+  using DiscretePlant = dynamical::lti::DiscretePlant<num_states, num_inputs>;
 
   DiscretePlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 0.8, 0.7 /*]*/,
@@ -190,15 +190,15 @@ TEST(Stability, Discrete_Unstable) {
 
   DiscretePlant plant(x_initial, test_A, test_B);
 
-  ASSERT_FALSE(dynamical::analysis::is_stable(plant));
+  ASSERT_FALSE(dynamical::lti::analysis::is_stable(plant));
 }
 
 TEST(Stability, Discrete_Stable) {
   // Random numbers, checked by hand.
 
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = 3
-  using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
-  using Feedback = dynamical::Feedback<num_states, num_inputs>;
+  using DiscretePlant = dynamical::lti::DiscretePlant<num_states, num_inputs>;
+  using Feedback = dynamical::lti::Feedback<num_states, num_inputs>;
 
   DiscretePlant::A_MatrixType test_A;
   test_A << /*[[*/ 1, 0.8, 0.7 /*]*/,
@@ -219,14 +219,15 @@ TEST(Stability, Discrete_Stable) {
   DiscretePlant plant(x_initial, test_A, test_B);
   Feedback feedback(test_K);
 
-  ASSERT_TRUE(dynamical::analysis::is_stable(plant, feedback));
+  ASSERT_TRUE(dynamical::lti::analysis::is_stable(plant, feedback));
 }
 
 TEST(Stability, Continuous_Unstable) {
   // Problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
 
   constexpr int num_states = 3, num_inputs = 1;  // num_outputs = 3
-  using ContinuousPlant = dynamical::ContinuousPlant<num_states, num_inputs>;
+  using ContinuousPlant =
+      dynamical::lti::ContinuousPlant<num_states, num_inputs>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1, 0 /*]*/,
@@ -243,15 +244,16 @@ TEST(Stability, Continuous_Unstable) {
 
   ContinuousPlant plant(x_initial, test_A, test_B);
 
-  ASSERT_FALSE(dynamical::analysis::is_stable(plant));
+  ASSERT_FALSE(dynamical::lti::analysis::is_stable(plant));
 }
 
 TEST(Stability, Continuous_Stable) {
   // Problem 4: https://inst.eecs.berkeley.edu/~ee16b/sp20/homework/prob11.pdf
 
   constexpr int num_states = 3, num_inputs = 1;  // num_outputs = 3
-  using ContinuousPlant = dynamical::ContinuousPlant<num_states, num_inputs>;
-  using Feedback = dynamical::Feedback<num_states, num_inputs>;
+  using ContinuousPlant =
+      dynamical::lti::ContinuousPlant<num_states, num_inputs>;
+  using Feedback = dynamical::lti::Feedback<num_states, num_inputs>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1, 0 /*]*/,
@@ -272,7 +274,7 @@ TEST(Stability, Continuous_Stable) {
   ContinuousPlant plant(x_initial, test_A, test_B);
   Feedback feedback(test_K);
 
-  ASSERT_TRUE(dynamical::analysis::is_stable(plant, feedback));
+  ASSERT_TRUE(dynamical::lti::analysis::is_stable(plant, feedback));
 }
 
 TEST(Stability, Discrete_Fuzzed_Sim) {
@@ -285,8 +287,8 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
   // nice continuous systems (eigenvalues with high norms).
 
   constexpr int num_states = 3, num_inputs = 2;
-  using DiscretePlant = dynamical::DiscretePlant<num_states, num_inputs>;
-  using Feedback = dynamical::Feedback<num_states, num_inputs>;
+  using DiscretePlant = dynamical::lti::DiscretePlant<num_states, num_inputs>;
+  using Feedback = dynamical::lti::Feedback<num_states, num_inputs>;
 
   int stable_systems_generated = 0, controllable_systems_generated = 0;
 
@@ -315,7 +317,7 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
 
     // The system has to be controllable to guarantee that the controller can
     // actually reach our target state.
-    if (!dynamical::analysis::is_controllable(plant)) {
+    if (!dynamical::lti::analysis::is_controllable(plant)) {
       std::cout << "uncontrollable system, skipping to next case...\n\n";
       continue;
     }
@@ -328,7 +330,8 @@ TEST(Stability, Discrete_Fuzzed_Sim) {
 
     std::cout << "K:\n" << random_K << "\n\n";
 
-    bool is_system_stable = dynamical::analysis::is_stable(plant, feedback);
+    bool is_system_stable =
+        dynamical::lti::analysis::is_stable(plant, feedback);
     if (is_system_stable) {
       std::cout << "stable system determined, running sim...\n";
       ++stable_systems_generated;  // avoiding adding bools (unsigned) to ints
@@ -367,10 +370,10 @@ TEST(Discretization, Dynamics_NoInput) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
-      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::ContinuousPlant<num_states, num_inputs, num_outputs>;
   using DiscretePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
-                               std::complex<double>>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs,
+                                    std::complex<double>>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, -1 /*]*/,
@@ -388,7 +391,7 @@ TEST(Discretization, Dynamics_NoInput) {
   // making sure it works for all kinds of values of dt
   for (double dt = 2; dt > 0.001; dt /= 2) {
     DiscretePlant discrete_plant =
-        dynamical::analysis::discretize(continuous_plant, dt);
+        dynamical::lti::analysis::discretize(continuous_plant, dt);
 
     DiscretePlant::A_MatrixType expected_A;
     expected_A << /*[[*/ std::cos(dt), -std::sin(dt) /*]*/,
@@ -405,10 +408,10 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
-      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::ContinuousPlant<num_states, num_inputs, num_outputs>;
   using DiscretePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
-                               std::complex<double>>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs,
+                                    std::complex<double>>;
 
   for (int i = 0; i != 20; ++i) {
     ContinuousPlant::A_MatrixType random_A =
@@ -424,9 +427,9 @@ TEST(Discretization, Dynamics_NoInput_Fuzzed) {
     // making sure it works for all kinds of values of dt
     for (double dt = 2; dt > 0.001; dt /= 2) {
       DiscretePlant discrete_plant =
-          dynamical::analysis::discretize(continuous_plant, dt);
+          dynamical::lti::analysis::discretize(continuous_plant, dt);
       DiscretePlant discrete_plant_doubled =
-          dynamical::analysis::discretize(continuous_plant_doubled, dt);
+          dynamical::lti::analysis::discretize(continuous_plant_doubled, dt);
 
       ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
           discrete_plant_doubled.A_, discrete_plant.A_ * discrete_plant.A_,
@@ -441,10 +444,10 @@ TEST(Discretization, SimpleSecondOrder) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 2;
   using ContinuousPlant =
-      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::ContinuousPlant<num_states, num_inputs, num_outputs>;
   using DiscretePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
-                               std::complex<double>>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs,
+                                    std::complex<double>>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1 /*]*/,
@@ -460,7 +463,7 @@ TEST(Discretization, SimpleSecondOrder) {
 
   ContinuousPlant continuous_plant(x_initial, test_A, test_B);
 
-  ASSERT_THROW(dynamical::analysis::discretize(continuous_plant, 0.01),
+  ASSERT_THROW(dynamical::lti::analysis::discretize(continuous_plant, 0.01),
                std::runtime_error);
 }
 
@@ -470,10 +473,10 @@ TEST(Discretization, SISO) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using ContinuousPlant =
-      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::ContinuousPlant<num_states, num_inputs, num_outputs>;
   using DiscretePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
-                               std::complex<double>>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs,
+                                    std::complex<double>>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1 /*]*/,
@@ -497,7 +500,7 @@ TEST(Discretization, SISO) {
       /*[*/ 0.17221 /*]]*/;
 
   DiscretePlant discrete_plant =
-      dynamical::analysis::discretize(continuous_plant, 0.1);
+      dynamical::lti::analysis::discretize(continuous_plant, 0.1);
 
   ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
       expected_A, discrete_plant.A_, 1e-5));

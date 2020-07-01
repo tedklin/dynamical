@@ -7,6 +7,7 @@
 #include "Eigen/Dense"
 
 namespace dynamical {
+namespace lti {
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
@@ -91,4 +92,5 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   }
 };
 
+}  // namespace lti
 }  // namespace dynamical

@@ -7,6 +7,7 @@
 #include "Eigen/Dense"
 
 namespace dynamical {
+namespace lti {
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
@@ -17,10 +18,10 @@ class Feedback {
   using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
   using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
-  // K_ref matrix dimensions are different than K if our reference signal is not
-  // full state, but we should be able to avoid differentiating between the two
-  // by ensuring our trajectories output reference signals with the appropriate
-  // dimensions.
+  // K_ref matrix dimensions might be different than K if our reference signal
+  // is not full state, but we should be able to avoid differentiating between
+  // the two by ensuring our trajectories output reference signals with the
+  // appropriate dimensions.
   using K_MatrixType = Eigen::Matrix<Scalar, input_dim, state_dim>;
 
   explicit Feedback(const K_MatrixType& K,
@@ -45,7 +46,7 @@ class Feedback {
   K_MatrixType K_ref_;
 };
 
-// Currently only supports discrete-time systems
+// Currently only supports discrete-time systems.
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
 class Observer {
@@ -74,18 +75,17 @@ class Observer {
         L_(plant.L_),
         x_hat_(x_hat_initial) {}
 
-  void Update(const y_VectorType& y, const u_VectorType& u) {
+  void UpdateEstimate(const y_VectorType& y, const u_VectorType& u) {
     y_hat_ = C_ * x_hat_ + D_ * u;
     x_hat_ = A_ * x_hat_ + B_ * u + L_ * (y - y_hat_);
   }
 
-  const x_VectorType& GetX_hat() const { return x_hat_; }
+  const x_VectorType& GetXhat() const { return x_hat_; }
 
   const A_MatrixType A_;
   const B_MatrixType B_;
   const C_MatrixType C_;
   const D_MatrixType D_;
-
   const L_MatrixType L_;
 
  protected:
@@ -104,15 +104,10 @@ class Controller {
              std::shared_ptr<ObserverType> observer_ptr)
       : feedback_ptr_(feedback_ptr), observer_ptr_(observer_ptr) {}
 
-  // TODO: does this even make sense to have?
-  Controller(const FeedbackType& feedback, const ObserverType& observer) {
-    feedback_ptr_ = std::make_shared<FeedbackType>(feedback);
-    observer_ptr_ = std::make_shared<ObserverType>(observer);
-  }
-
  private:
   std::shared_ptr<FeedbackType> feedback_ptr_;
   std::shared_ptr<ObserverType> observer_ptr_;
 };
 
+}  // namespace lti
 }  // namespace dynamical

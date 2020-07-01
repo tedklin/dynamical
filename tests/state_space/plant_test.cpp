@@ -12,8 +12,8 @@ namespace testing {
 
 TEST(Plant, DimensionCheck) {
   constexpr int num_states = 3, num_inputs = 2, num_outputs = num_states;
-  using SimplePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs, double>;
+  using SimplePlant = dynamical::lti::DiscretePlant<num_states, num_inputs,
+                                                    num_outputs, double>;
   SimplePlant plant(
       SimplePlant::x_VectorType::Random(), SimplePlant::A_MatrixType::Random(),
       SimplePlant::B_MatrixType::Random(), SimplePlant::C_MatrixType::Random(),
@@ -35,7 +35,7 @@ TEST(Plant, DimensionCheck) {
 
 TEST(Plant, DefaultArgumentCheck) {
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
-  using SimplePlant = dynamical::DiscretePlant<num_states, num_inputs>;
+  using SimplePlant = dynamical::lti::DiscretePlant<num_states, num_inputs>;
   SimplePlant plant(SimplePlant::x_VectorType::Random(),
                     SimplePlant::A_MatrixType::Random(),
                     SimplePlant::B_MatrixType::Random());
@@ -49,7 +49,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 1;
   using SISOPlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs>;
 
   // Explicitly define A and B matrices for system that we know is controllable
   SISOPlant::A_MatrixType test_A;
@@ -66,7 +66,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
 
     SISOPlant::x_VectorType x_target = SISOPlant::x_VectorType::Random();
     Eigen::MatrixXd controllability_matrix =
-        dynamical::analysis::get_controllability_matrix(plant);
+        dynamical::lti::analysis::get_controllability_matrix(plant);
 
     // calculate a two-step input sequence that should reach the target state
     Eigen::Vector2d inverted_input_sequence =
@@ -100,10 +100,10 @@ TEST(Plant, PropagateContinuousDynamics_Sim) {
 
   constexpr int num_states = 3, num_inputs = 1, num_outputs = 3;
   using ContinuousPlant =
-      dynamical::ContinuousPlant<num_states, num_inputs, num_outputs>;
+      dynamical::lti::ContinuousPlant<num_states, num_inputs, num_outputs>;
   using DiscretePlant =
-      dynamical::DiscretePlant<num_states, num_inputs, num_outputs,
-                               std::complex<double>>;
+      dynamical::lti::DiscretePlant<num_states, num_inputs, num_outputs,
+                                    std::complex<double>>;
 
   for (int i = 0; i != 50; ++i) {
     ContinuousPlant continuous_plant(ContinuousPlant::x_VectorType::Random(),
@@ -113,7 +113,7 @@ TEST(Plant, PropagateContinuousDynamics_Sim) {
     constexpr double dt = 0.01;
 
     DiscretePlant discrete_plant =
-        dynamical::analysis::discretize(continuous_plant, dt);
+        dynamical::lti::analysis::discretize(continuous_plant, dt);
 
     for (int step = 0; step != 1000; ++step) {
       ContinuousPlant::u_VectorType u_cont =
