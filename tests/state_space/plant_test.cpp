@@ -8,7 +8,7 @@
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 
-namespace testing {
+namespace dynamical_testing {
 
 TEST(Plant, DimensionCheck) {
   constexpr int num_states = 3, num_inputs = 2, num_outputs = num_states;
@@ -133,4 +133,4 @@ TEST(Plant, PropagateContinuousDynamics_RT) {
   // system (if we could) and test the discretized model against that.
 }
 
-}  // namespace testing
+}  // namespace dynamical_testing

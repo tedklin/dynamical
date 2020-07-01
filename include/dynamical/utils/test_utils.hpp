@@ -7,7 +7,7 @@
 
 #include "Eigen/Dense"
 
-namespace testing {
+namespace dynamical_testing {
 namespace dynamical_test_utils {
 
 bool check_matrix_equality(Eigen::MatrixXcd expected, Eigen::MatrixXcd actual,
@@ -32,4 +32,4 @@ bool check_matrix_equality(Eigen::MatrixXcd expected, Eigen::MatrixXcd actual,
 }
 
 }  // namespace dynamical_test_utils
-}  // namespace testing
+}  // namespace dynamical_testing

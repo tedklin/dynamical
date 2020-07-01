@@ -10,7 +10,7 @@
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 
-namespace testing {
+namespace dynamical_testing {
 
 /* ============================= */
 /* === CONTROLLABILITY TESTS === */
@@ -509,4 +509,4 @@ TEST(Discretization, SISO) {
 // TODO: implement this
 TEST(Discretization, MIMO) {}
 
-}  // namespace testing
+}  // namespace dynamical_testing

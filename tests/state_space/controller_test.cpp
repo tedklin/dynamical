@@ -8,7 +8,7 @@
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
 
-namespace testing {
+namespace dynamical_testing {
 
 TEST(Controller, FeedbackSanityCheck) {
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
@@ -29,4 +29,4 @@ TEST(Controller, FeedbackSanityCheck) {
       expected_u, feedback.GetU(curr_state, desired_state)));
 }
 
-}  // namespace testing
+}  // namespace dynamical_testing

@@ -57,7 +57,7 @@ This living document is intended to lay out some design decisions and non-obviou
 
 ### state_space/plant.hpp
 *Plant*
-- *namespace dynamical*
+- *namespace dynamical::lti*
 - *type: abstract class template*
 - Design with inheritance was used despite there only being two children of Plant. This is because there are several instances where the distinction between discrete-time and continuous-time plants are ignored (e.g. controllability and observability), but there are also significant differences between the two (discrete-time systems are characterized by difference equations whereas continuous-time plants are characterized by differential equations).
 - access control
@@ -74,23 +74,22 @@ This living document is intended to lay out some design decisions and non-obviou
         - In general, it doesn't make sense to create a Plant without any dynamics.
         - Note that if users do need to create a Plant without any dynamics, they can still do so explicitly.
     - one defined constructor, with the initial state vector as the first argument and default arguments for the C and D matrices.
-        - The considerations I took for the design of the constructor(s) for this class are as follows:
-            - In EECS16B, the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
-                - This is also why the template parameter num_outputs has a default argument of num_states.
-            - It is more common to need to specify a nonzero initial state vector x than to define D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
-                - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
+        - In EECS16B, the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
+            - This is also why the template parameter num_outputs has a default argument of num_states.
+        - It is more common to need to specify a nonzero initial state vector x than to define D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
+            - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
 - copy-control.
     - none explicitly defined (Rule of Zero).
     - all are synthesized(?)
 
 *DiscretePlant*
-- *namespace dynamical*
+- *namespace dynamical::lti*
 - *type: class template implementation of Plant*
 - The first using declaration lets us inherit all non copy-control constructors directly from Plant.
 - Inheritance can be a little bit tricky with templates, see quick explanation [here](https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members) for why we need an explicit *this->* and typename declarations.
 
 *ContinuousPlant*
-- *namespace dynamical*
+- *namespace dynamical::lti*
 - *type: class template implementation of Plant*
 - TODO: check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
 - TODO: implement Update() as real-time update?
@@ -102,11 +101,11 @@ This living document is intended to lay out some design decisions and non-obviou
 ### state_space/controller.hpp
 
 *Controller*
-- *namespace dynamical*
+- *namespace dynamical::lti*
 - *type: class template*
 
 *Observer*
-- *namespace dynamical*
+- *namespace dynamical::lti*
 - *type: class template*
 - An observer conceptually contains an internal model of the plant it's observing. The observer naturally shouldn't have the power to directly "update" the actual plant's current state *x*. Instead the observer keeps its own internal estimate of the state *x_hat* and updates that.
     - Using a pointer to the observed plant would probably be more efficient on initialization, but hides the intention / role of the observer. I opted to just copy the A, B, C, and D matrices (encoding the dynamics of the system) from the given plant to observe.
@@ -123,23 +122,21 @@ Overall notes:
 - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
 
 *get_controllability_matrix*
-- *namespace dynamical::analysis*
+- *namespace dynamical::lti::analysis*
 - *type: function template*
 - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
     - TODO: understand this better.
 
 *get_observability_matrix*
-- *namespace dynamical::analysis*
+- *namespace dynamical::lti::analysis*
 - *type: function template*
 
 *is_stable*
-- *namespace dynamical::analysis*
+- *namespace dynamical::lti::analysis*
 - *type: function template*
-- TODO: figure out if four overloads for this method is really necessary.
-    - but don't cut down on overloads if it means losing guarantees on correctness and safety.
 
 *discretize*
-- *namespace dynamical::analysis*
+- *namespace dynamical::lti::analysis*
 - *type: function template*
 - This function implements continuous-time plant discretization as taught in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/). 
     - This method uses the eigenbasis (which isn't guaranteed to be real even if your matrix is real) for diagonalization. At first I tried to optimize for cases where the eigenbasis actually is real to avoid the overhead of *std::complex*, but it became a long struggle with the Eigen library's type deduction/conversion rules. I ended up just sticking with *std::complex< double >* for everything, so all DiscretePlant instances created by this function have a complex double Scalar type regardless of what ContinuousPlant is passed in.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dynamical/state_space/plant.hpp"
+#include "dynamical/state_space/trajectory.hpp"
 
 #include <memory>
 
@@ -99,14 +100,19 @@ class Controller {
  public:
   using FeedbackType = Feedback<state_dim, input_dim, output_dim, Scalar>;
   using ObserverType = Observer<state_dim, input_dim, output_dim, Scalar>;
+  using TrajectoryType = trajectory::Trajectory<state_dim, input_dim, Scalar>;
 
   Controller(std::shared_ptr<FeedbackType> feedback_ptr,
-             std::shared_ptr<ObserverType> observer_ptr)
-      : feedback_ptr_(feedback_ptr), observer_ptr_(observer_ptr) {}
+             std::shared_ptr<ObserverType> observer_ptr,
+             std::shared_ptr<TrajectoryType> trajectory_ptr)
+      : feedback_(feedback_ptr),
+        observer_(observer_ptr),
+        trajectory_(trajectory_ptr) {}
 
  private:
-  std::shared_ptr<FeedbackType> feedback_ptr_;
-  std::shared_ptr<ObserverType> observer_ptr_;
+  std::shared_ptr<FeedbackType> feedback_;
+  std::shared_ptr<ObserverType> observer_;
+  std::shared_ptr<TrajectoryType> trajectory_;
 };
 
 }  // namespace lti

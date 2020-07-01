@@ -11,7 +11,7 @@
 // in the context of estimating continuous-time dynamics can be found in
 // state_space/plant_test.cpp.
 
-namespace testing {
+namespace dynamical_testing {
 
 TEST(Integration, RK4Scalar) {
   double result = dynamical::numerical::integral::rk4(
@@ -32,4 +32,4 @@ TEST(Integration, RK4Vector) {
       curr_x, 0.01);
 }
 
-}  // namespace testing
+}  // namespace dynamical_testing
