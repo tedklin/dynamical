@@ -12,7 +12,8 @@ namespace dynamical_testing {
 
 TEST(Controller, FeedbackSanityCheck) {
   constexpr int num_states = 3, num_inputs = 2;  // num_outputs = num_states
-  using SimplePlant = dynamical::lti::DiscretePlant<num_states, num_inputs>;
+  using SimplePlant =
+      dynamical::lti::sim::DiscretePlant<num_states, num_inputs>;
   using Feedback = dynamical::lti::Feedback<num_states, num_inputs>;
 
   Feedback::K_MatrixType random_K = Feedback::K_MatrixType::Random();

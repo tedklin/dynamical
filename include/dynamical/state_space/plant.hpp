@@ -8,6 +8,7 @@
 
 namespace dynamical {
 namespace lti {
+namespace sim {
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
@@ -51,6 +52,8 @@ class Plant {
   x_VectorType x_initial_;
   x_VectorType x_;
   y_VectorType y_ = y_VectorType::Zero();
+
+  bool noise_present_ = false;
 };
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
@@ -92,5 +95,6 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   }
 };
 
+}  // namespace sim
 }  // namespace lti
 }  // namespace dynamical

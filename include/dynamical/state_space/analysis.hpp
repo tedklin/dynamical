@@ -6,7 +6,7 @@
 
 #include <cmath>
 #include <complex>
-#include <iostream>  // TODO: remove or keep diagnostic prints?
+#include <iostream>
 
 namespace dynamical {
 namespace lti {
@@ -14,7 +14,7 @@ namespace analysis {
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant,
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
     int num_steps_allowed = state_dim) {
   Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix(
       state_dim, (num_steps_allowed * input_dim));
@@ -34,7 +34,7 @@ Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
 // TODO: check the numerical robustness of this?
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_controllable(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
   Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix =
       get_controllability_matrix(plant);
   Eigen::ColPivHouseholderQR<decltype(controllability_matrix)> qr_decomp(
@@ -47,7 +47,7 @@ bool is_controllable(
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>
 get_observability_matrix(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
   Eigen::Matrix<Scalar, output_dim * state_dim, state_dim> observability_matrix;
   Eigen::Matrix<Scalar, output_dim, state_dim> step_block = plant.C_;
 
@@ -64,7 +64,7 @@ get_observability_matrix(
 // TODO: test
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_observable(
-    const Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
   Eigen::FullPivLU<decltype(plant.C_)> lu(plant.C_);
   if (lu.isInvertible()) {
     return true;
@@ -110,7 +110,7 @@ bool stability_helper(
 // (tricky with templates, use std::issame)
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(
-    const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
+    const sim::DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
         discrete_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
   // std::cout << "running discrete stability check...\n\n";
@@ -122,8 +122,8 @@ bool is_stable(
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
-                   discrete_plant) {
+bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
+                                        Scalar>& discrete_plant) {
   // std::cout << "running discrete stability check...\n\n";
 
   return stability_helper(discrete_plant.A_, true);
@@ -131,7 +131,7 @@ bool is_stable(const DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(
-    const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+    const sim::ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
         continuous_plant,
     const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
   // std::cout << "running continuous stability check...\n\n";
@@ -143,19 +143,19 @@ bool is_stable(
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_stable(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
-                   continuous_plant) {
+bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
+                                          Scalar>& continuous_plant) {
   // std::cout << "running continuous stability check...\n\n";
 
   return stability_helper(continuous_plant.A_, false);
 }
 
-// discretization by diagonalization
-// the returned discrete model has complex Scalar type std::complex<double>
+// Discretization by diagonalization.
+// The returned discrete model has complex Scalar type std::complex<double>.
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
-discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+sim::DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
+discretize(const sim::ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
                continuous_plant,
            double dt) {
   Eigen::EigenSolver<Eigen::Matrix<Scalar, state_dim, state_dim>> eigensolver(
@@ -200,7 +200,7 @@ discretize(const ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
       A_eigenbasis * particular_sol * A_eigenbasis_inverse *
       continuous_plant.B_;
 
-  DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
+  sim::DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
       discretized_plant(continuous_plant.GetX(), A_discretized, B_discretized,
                         continuous_plant.C_, continuous_plant.D_);
 

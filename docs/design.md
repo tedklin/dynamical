@@ -1,6 +1,6 @@
 # Design document
 
-This living document is intended to lay out some design decisions and non-obvious code. It's for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It doesn't cover all functionality.
+This living document is intended to lay out some design decisions and non-obvious code. It's for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It doesn't cover all functionality and isn't intended to be used as formal documentation.
 
 
 ## Some driving design goals
@@ -22,11 +22,10 @@ This living document is intended to lay out some design decisions and non-obviou
     - Learn how to use tools like sanitizers and profilers. 
 
 
-## Levels of functionality
+## Levels of functionality (currently planned)
 
 1. Discrete-time linear control system design
-2. Linear systems analysis
-    - with limited functionality for continuous-time systems.
+2. Linear systems simulation and analysis
 3. Nonlinear control system design (onboard linearization)
 4. Integrated solvers and implementations for optimal control (LQR, MPC, etc.)
 
@@ -34,14 +33,14 @@ This living document is intended to lay out some design decisions and non-obviou
 ## High-level TODOs
 - TEMPLATES ARE EVERYWHERE
     - TODO: how to make this cleaner???
+- I have yet to reaaally dive into optimizations like move semantics for all my self-defined types.
+    - TODO: dive into move semantics?
 - The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large.
     - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
     - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
     - TODO: read up on return value optimization to see if this is really a problem at all.
         - i think i understand copy elision eliminating the copy action into the temporary, but it seems like there's still a copy-assign happening at the call site. when a function returns a local object by value, is there a way to just directly use move semantics? or does the compiler do that implicitly?
     - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
-- Some of the decisions I'm making are taking into heavy consideration possible usage with my school's (very) introductory systems class ([EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). This might result in some features that don't make sense for real world systems.
-    - TODO: decide if satisfying 16B constraints is really worth it.
 
 
 ## High-level design notes
@@ -51,15 +50,17 @@ This living document is intended to lay out some design decisions and non-obviou
 - Does the order in which *x* and *y* are updated matter (see Plant and Observer)? My current implementation updates y first.
     - It seems like y should be updated before x based on the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer), but most implementations I've seen update x first ("predict then correct" Kalman filter concept). 
     - It might not matter that much when running at high clock rates as long as it's consistent as to which comes first, but making a note regardless.
+- I use fairly deep namespaces (around 3 levels) to signify intention clearly. I'm not sure if this is considered good practice, but I feel like it's made code easier to follow.
 
 
 ## File-by-file implementation details
 
 ### state_space/plant.hpp
 *Plant*
-- *namespace dynamical::lti*
+- *namespace dynamical::lti::sim*
 - *type: abstract class template*
-- Design with inheritance was used despite there only being two children of Plant. This is because there are several instances where the distinction between discrete-time and continuous-time plants are ignored (e.g. controllability and observability), but there are also significant differences between the two (discrete-time systems are characterized by difference equations whereas continuous-time plants are characterized by differential equations).
+- overall notes
+    - Design with inheritance was used despite there only being two children of Plant. This is because there are several instances where the distinction between discrete-time and continuous-time plants are ignored (e.g. controllability and observability), but there are also significant differences between the two (discrete-time systems are characterized by difference equations whereas continuous-time plants are characterized by differential equations).
 - access control
     - public using declarations for type names
         - Users can avoid errors in specifying the various dimensions of the system matrices.
@@ -83,19 +84,21 @@ This living document is intended to lay out some design decisions and non-obviou
     - all are synthesized(?)
 
 *DiscretePlant*
-- *namespace dynamical::lti*
+- *namespace dynamical::lti::sim*
 - *type: class template implementation of Plant*
-- The first using declaration lets us inherit all non copy-control constructors directly from Plant.
-- Inheritance can be a little bit tricky with templates, see quick explanation [here](https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members) for why we need an explicit *this->* and typename declarations.
+- overall notes:
+    - The first using declaration lets us inherit all non copy-control constructors directly from Plant.
+    - Inheritance can be a little bit tricky with templates, see quick explanation [here](https://isocpp.org/wiki/faq/templates#nondependent-name-lookup-members) for why we need an explicit *this->* and typename declarations.
 
 *ContinuousPlant*
-- *namespace dynamical::lti*
+- *namespace dynamical::lti::sim*
 - *type: class template implementation of Plant*
-- TODO: check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
-- TODO: implement Update() as real-time update?
-    - std::chrono
-        - https://en.cppreference.com/w/cpp/chrono/duration
-        - https://en.cppreference.com/w/cpp/chrono/time_point
+- overall notes:
+    - TODO: check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
+    - TODO: implement Update() as real-time update?
+        - std::chrono
+            - https://en.cppreference.com/w/cpp/chrono/duration
+            - https://en.cppreference.com/w/cpp/chrono/time_point
 
 
 ### state_space/controller.hpp
@@ -107,11 +110,15 @@ This living document is intended to lay out some design decisions and non-obviou
 *Observer*
 - *namespace dynamical::lti*
 - *type: class template*
-- An observer conceptually contains an internal model of the plant it's observing. The observer naturally shouldn't have the power to directly "update" the actual plant's current state *x*. Instead the observer keeps its own internal estimate of the state *x_hat* and updates that.
-    - Using a pointer to the observed plant would probably be more efficient on initialization, but hides the intention / role of the observer. I opted to just copy the A, B, C, and D matrices (encoding the dynamics of the system) from the given plant to observe.
-- The observer introduces a new term (*L(y - Cx_hat)*) to the original propagation equations Ax + Bu. We need to differentiate between observers for discrete-time systems and continuous-time systems because the propogation equations are different types (discrete difference equation vs continuous differential equation).
-    - I couldn't think of any instances where the distinction between discrete-time and continuous-time observers can be ignored, so inheritance didn't seem appropriate. An enum seems like the easiest way to keep track of what type of system the observer is dealing with.
-    - However, at the moment, I'm not sure about the practicality of actually using a complete state feedback controller based in continuous-time (numerical integration / time sync errors add up), so the current implementation is just for discrete time.
+- overall notes:
+    - **This is where the EECS16B training wheels come off!** No more default arguments that help users ignore the concept of "output" being different from "state".
+    - An observer conceptually contains an internal model of the plant it's observing. The observer naturally shouldn't have the power to directly "update" the actual plant's current state *x*. Instead the observer keeps its own internal estimate of the state *x_hat* and updates that.
+        - Using a pointer to the observed plant would probably be more efficient on initialization, but hides the intention / role of the observer. I opted to just copy the A, B, C, and D matrices (encoding the dynamics of the system) from the given plant to observe.
+    - The observer introduces a new term (*L(y - Cx_hat)*) to the original propagation equations Ax + Bu. We need to differentiate between observers for discrete-time systems and continuous-time systems because the propogation equations are different types (discrete difference equation vs continuous differential equation).
+        - I couldn't think of any instances where the distinction between discrete-time and continuous-time observers can be ignored, so inheritance didn't seem appropriate. An enum seems like the easiest way to keep track of what type of system the observer is dealing with.
+        - However, at the moment, I'm not sure about the practicality of actually using a complete state feedback controller based in continuous-time (numerical integration / time sync errors add up), so the current implementation is just for discrete time.
+- constructor
+    - The order of parameters in Observer's constructors is mostly influenced by the order of Plant's constructor. It can be argued that there are situations where users wouldn't specify an initial state estimate (in which case a default argument of zeros would be appropriate), but at this point users should understand they can just pass in *EigenMatrixType::Zero()*.
 
 
 ### state_space/analysis.hpp
@@ -120,6 +127,7 @@ Overall notes:
 - The current implementation looks pretty cluttered. But template definitions shouldn't be separated from their declarations, so I'm not really sure how to make this better.
     - TODO: is there a better way to organize this or just leave it as is?
 - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
+- TODO: look into some kind of "verbose" option that users can set, which enables diagnostic prints.
 
 *get_controllability_matrix*
 - *namespace dynamical::lti::analysis*
