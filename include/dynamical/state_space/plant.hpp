@@ -24,14 +24,14 @@ class Plant {
   using y_VectorType = Eigen::Matrix<Scalar, output_dim, 1>;
   using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
+  virtual ~Plant() = default;
+
   Plant() = delete;
 
   Plant(const x_VectorType& x_initial, const A_MatrixType& A,
         const B_MatrixType& B, const C_MatrixType& C = C_MatrixType::Identity(),
         const D_MatrixType& D = D_MatrixType::Zero())
       : A_(A), B_(B), C_(C), D_(D), x_initial_(x_initial), x_(x_initial) {}
-
-  virtual ~Plant() = default;
 
   virtual void Update(const u_VectorType& u) = 0;
 

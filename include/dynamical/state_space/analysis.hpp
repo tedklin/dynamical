@@ -12,7 +12,7 @@ namespace dynamical {
 namespace lti {
 namespace analysis {
 
-// TODO: cut out output_dim template parameter for functions that don't need it
+// TODO: cut out unnecessary template parameters?
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(

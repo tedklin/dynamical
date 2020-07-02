@@ -110,12 +110,28 @@ class Controller {
         observer_(observer_ptr),
         trajectory_(trajectory_ptr) {}
 
-  // TODO: finish implementing
+  // The intuition behind this might be misleading at first to people accustomed
+  // to direct feedback (like I was). The y passed in does not actually play a
+  // direct role in the generation of the u returned, but rather influences the
+  // next u. The sole purpose of the y passed in is to update the state
+  // estimator.
+  // TODO: come up with a more straightforward name for this function
+  const u_VectorType& GetU(const y_VectorType& y, int trajectory_step) {
+    u_ = feedback_->GetU(observer_->GetXhat(),
+                         trajectory_->GetDesiredState(trajectory_step)) +
+         trajectory_->GetFeedforward(trajectory_step);
+
+    observer_->UpdateEstimate(y, u_);
+
+    return u_;
+  }
 
  private:
   std::shared_ptr<FeedbackType> feedback_;
   std::shared_ptr<ObserverType> observer_;
   std::shared_ptr<TrajectoryType> trajectory_;
+
+  u_VectorType u_ = u_VectorType::Zero();
 };
 
 }  // namespace lti

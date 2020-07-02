@@ -35,7 +35,7 @@ This living document is intended to lay out some design decisions and non-obviou
     - TODO: how to make this cleaner???
 - I have yet to reaaally dive into optimizations like move semantics for all my self-defined types.
     - TODO: dive into move semantics?
-- The current implementation of most of the functions returns by value. This could be an expensive copy operation if the data structure is large.
+- The current implementation of most of my standalone functions returns by value. This could be an expensive copy operation if the data structure is large.
     - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
     - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
     - TODO: read up on return value optimization to see if this is really a problem at all.
@@ -47,10 +47,8 @@ This living document is intended to lay out some design decisions and non-obviou
 - Most of the math is implemented with techniques we learned in EECS16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
     - A&M notes that it prefers "reachability" to "controllability", and they're technically not the same thing, but in the context of 16B they're the same thing and we use the term "controllability".
-- Does the order in which *x* and *y* are updated matter (see Plant and Observer)? My current implementation updates y first.
-    - It seems like y should be updated before x based on the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer), but most implementations I've seen update x first ("predict then correct" Kalman filter concept). 
-    - It might not matter that much when running at high clock rates as long as it's consistent as to which comes first, but making a note regardless.
-- I use fairly deep namespaces (around 3 levels) to signify intention clearly. I'm not sure if this is considered good practice, but I feel like it's made code easier to follow.
+- I'm not really sure if the order I'm executing things is proper. The current implementation is mostly based on the equations in the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer).
+- I use fairly deep namespaces (around 3 levels) to signify intention clearly. I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
 
 
 ## File-by-file implementation details
@@ -113,7 +111,7 @@ This living document is intended to lay out some design decisions and non-obviou
 - overall notes:
     - **This is where the EECS16B training wheels come off!** No more default arguments that help users ignore the concept of "output" being different from "state".
     - An observer conceptually contains an internal model of the plant it's observing. The observer naturally shouldn't have the power to directly "update" the actual plant's current state *x*. Instead the observer keeps its own internal estimate of the state *x_hat* and updates that.
-        - Using a pointer to the observed plant would probably be more efficient on initialization, but hides the intention / role of the observer. I opted to just copy the A, B, C, and D matrices (encoding the dynamics of the system) from the given plant to observe.
+        - Note that in the current implementation, *x_hat* represents an estimation of the state one step ahead of the last information passed in.
     - The observer introduces a new term (*L(y - Cx_hat)*) to the original propagation equations Ax + Bu. We need to differentiate between observers for discrete-time systems and continuous-time systems because the propogation equations are different types (discrete difference equation vs continuous differential equation).
         - I couldn't think of any instances where the distinction between discrete-time and continuous-time observers can be ignored, so inheritance didn't seem appropriate. An enum seems like the easiest way to keep track of what type of system the observer is dealing with.
         - However, at the moment, I'm not sure about the practicality of actually using a complete state feedback controller based in continuous-time (numerical integration / time sync errors add up), so the current implementation is just for discrete time.
