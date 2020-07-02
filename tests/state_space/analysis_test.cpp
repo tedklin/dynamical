@@ -279,7 +279,7 @@ TEST(Stability, Continuous_Stable) {
   ASSERT_TRUE(dynamical::lti::analysis::is_stable(plant, feedback));
 }
 
-TEST(Stability, Discrete_Fuzzed_Sim) {
+TEST(Stability, Discrete_Sim) {
   // Multiple tests with discrete systems generated from random matrices.
   // The result of the is_stable function is compared against simulations with
   // extended number of steps.
@@ -405,7 +405,7 @@ TEST(Discretization, Dynamics_NoInput) {
   }
 }
 
-TEST(Discretization, Dynamics_NoInput_Fuzzed) {
+TEST(Discretization, Dynamics_NoInput_Exponential) {
   // This test takes advantage of the property that eigenvalues of a continuous
   // system always end up in the exponent of its discretized version.
 

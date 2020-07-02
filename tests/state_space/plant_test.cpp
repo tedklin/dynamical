@@ -60,7 +60,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
   test_B << /*[[*/ 0 /*]*/,
       /*[*/ 1 /*]]*/;
 
-  // Test a couple of random initial state / target state pairs
+  // Test a couple of random initial state / target state pairs.
   for (int i = 0; i != 20; ++i) {
     SISOPlant::x_VectorType x_initial = SISOPlant::x_VectorType::Random();
     SISOPlant plant(x_initial, test_A, test_B);
