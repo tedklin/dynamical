@@ -10,6 +10,8 @@ namespace dynamical {
 namespace lti {
 namespace sim {
 
+// TODO: add functionality to inject white noise
+
 template <int state_dim, int input_dim, int output_dim = state_dim,
           typename Scalar = double>
 class Plant {

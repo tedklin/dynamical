@@ -12,6 +12,8 @@ namespace dynamical {
 namespace lti {
 namespace analysis {
 
+// TODO: cut out output_dim template parameter for functions that don't need it
+
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
     const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
@@ -109,10 +111,9 @@ bool stability_helper(
 // TODO: consider type identification to cut down number of function overloads
 // (tricky with templates, use std::issame)
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_stable(
-    const sim::DiscretePlant<state_dim, input_dim, output_dim, Scalar>&
-        discrete_plant,
-    const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
+bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
+                                        Scalar>& discrete_plant,
+               const Feedback<state_dim, input_dim, Scalar>& feedback) {
   // std::cout << "running discrete stability check...\n\n";
 
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
@@ -130,10 +131,9 @@ bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
 }
 
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
-bool is_stable(
-    const sim::ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
-        continuous_plant,
-    const Feedback<state_dim, input_dim, output_dim, Scalar>& feedback) {
+bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
+                                          Scalar>& continuous_plant,
+               const Feedback<state_dim, input_dim, Scalar>& feedback) {
   // std::cout << "running continuous stability check...\n\n";
 
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =

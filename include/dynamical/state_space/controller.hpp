@@ -10,8 +10,7 @@
 namespace dynamical {
 namespace lti {
 
-template <int state_dim, int input_dim, int output_dim = state_dim,
-          typename Scalar = double>
+template <int state_dim, int input_dim, typename Scalar = double>
 class Feedback {
  public:
   // TODO: figure out how to forward types from a completely unrelated template
@@ -100,7 +99,7 @@ class Controller {
   using y_VectorType = Eigen::Matrix<Scalar, output_dim, 1>;
   using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
-  using FeedbackType = Feedback<state_dim, input_dim, output_dim, Scalar>;
+  using FeedbackType = Feedback<state_dim, input_dim, Scalar>;
   using ObserverType = Observer<state_dim, input_dim, output_dim, Scalar>;
   using TrajectoryType = trajectory::Trajectory<state_dim, input_dim, Scalar>;
 
@@ -110,6 +109,8 @@ class Controller {
       : feedback_(feedback_ptr),
         observer_(observer_ptr),
         trajectory_(trajectory_ptr) {}
+
+  // TODO: finish implementing
 
  private:
   std::shared_ptr<FeedbackType> feedback_;
