@@ -32,4 +32,5 @@ package_add_test(integration_test math/integral_test.cpp)
 package_add_test(plant_test state_space/plant_test.cpp)
 package_add_test(analysis_test state_space/analysis_test.cpp)
 package_add_test(controller_test state_space/controller_test.cpp)
+package_add_test(trajectory_test state_space/trajectory_test.cpp)
 # ^ ADD NEW TESTS HERE
