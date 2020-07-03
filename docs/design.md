@@ -30,44 +30,74 @@ This living document is intended to lay out some design decisions and non-obviou
 4. Integrated solvers and implementations for optimal control (LQR, MPC, etc.)
 
 
-## High-level TODOs
-- TEMPLATES ARE EVERYWHERE
-    - TODO: how to make this cleaner???
-- I have yet to reaaally dive into optimizations like move semantics for all my self-defined types.
-    - TODO: dive into move semantics?
-- The current implementation of most of my standalone functions returns by value. This could be an expensive copy operation if the data structure is large.
-    - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
-    - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work (and have an understanding of smart pointers).
-    - TODO: read up on return value optimization to see if this is really a problem at all.
-        - i think i understand copy elision eliminating the copy action into the temporary, but it seems like there's still a copy-assign happening at the call site. when a function returns a local object by value, is there a way to just directly use move semantics? or does the compiler do that implicitly?
-    - TODO: explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
-
-
-## High-level design notes
+## Overall control system design notes
 - Most of the math is implemented with techniques we learned in EECS16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
     - A&M notes that it prefers "reachability" to "controllability", and they're technically not the same thing, but in the context of 16B they're the same thing and we use the term "controllability".
 - I'm not really sure if the order I'm executing things is proper. The current implementation is mostly based on the equations in the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer).
-- I use fairly deep namespaces (around 3 levels) to signify intention clearly. I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
+
+
+## Overall C++ design notes
+- Heavy use of templates
+    - Things get pretty messy at times but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
+- Namespaces designed to be very specific (around three levels) to signify intention clearly.
+    - I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
+- Avoid *auto* with Eigen types, even where it makes sense.
+    - Reasoning
+        - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html)
+        - Better-guaranteed correctness if everything is just spelt out.
+    - Cons:
+        - Verbosity (and most likely readability).
+- Public using declarations for type names of matrices (e.g. A_MatrixType, x_VectorType) were included inside most of my self-defined classes that deal with Eigen matrices.
+    - Reasoning:
+        - Eliminate the verbosity of declaring Eigen fixed matrix types everywhere.
+        - Intuitively matches to template parameters of corresponding class.
+        - Users can avoid errors in specifying the various dimensions of the system matrices.
+        - Users can easily create ["special" Eigen matrices](https://eigen.tuxfamily.org/dox/group__TutorialAdvancedInitialization.html) of the correct type.
+    - Cons:
+        - Need to repeat relevant using declarations for every new class I create.
+        - Introduces possibility for error on my side (although I usually copy and paste these).
+    - Notes:
+        - An alternative could be defining wrapper classes that include all the relevant types given certain template parameters??
+- Public constant data members where it makes sense; standard encapsulation elsewhere.
+    - Reasoning:
+        - Eliminate the need for trivial getters ([C.131](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#c131-avoid-trivial-getters-and-setters)).
+- Deleted default constructor for most self-defined types.
+    - Reasoning:
+        - Eigen matrices are default initialized to undefined values, so it's important to make sure every Eigen class data member is properly initialized. Each class' set of constructors was carefully designed to force users to explicitly define what they want.
+    - Notes:
+        - Might make some synthesized copy-control members dysfunctional?
+- No explicitly defined copy-control members unless needed.
+    - Reasoning:
+        - Rule of Zero.
+    - TODO:
+        - investigate what happens under the hood.
+- Many of my functions that aren't part of a class return by value.
+    - Reasoning:
+        - More guaranteed behavior.
+        - Rely on compiler to make optimizations where appropriate.
+    - Notes
+        - This could result in expensive copy operations.
+        - An alternative is returning by reference, but undefined behavior would result if object to be returned is defined and created locally (in the function itself). Returning by reference would require the user to do something like manually define their object first, then pass it by reference as an argument to the function.
+        - Another alternative is returning a smart pointer (like a unique_ptr factory), but this would also require the user to do more work.
+    - TODO:
+        - read up on RVO to see if this is really a problem at all.
+            - i think i understand copy elision eliminating the copy action into the temporary, but it seems like there's still a copy-assign happening at the call site. when a function returns a local object by value, is there a way to just directly use move semantics? or does the compiler do that implicitly?
+        - explore more alternate possibilities to avoid expensive copy operation while maintaining ease of use.
+- TODO: look into implementing some kind of "verbose" user option that would enable diagnostic prints.
+- TODO: look into more methods of reducing compile times.
 
 
 ## File-by-file implementation details
 
-### state_space/plant.hpp
+### lti/
+
+#### lti/plant.hpp
 *Plant*
 - *namespace dynamical::lti::sim*
 - *type: abstract class template*
 - overall notes
     - Design with inheritance was used despite there only being two children of Plant. This is because there are several instances where the distinction between discrete-time and continuous-time plants are ignored (e.g. controllability and observability), but there are also significant differences between the two (discrete-time systems are characterized by difference equations whereas continuous-time plants are characterized by differential equations).
-- access control
-    - public using declarations for type names
-        - Users can avoid errors in specifying the various dimensions of the system matrices.
-        - Users can easily create special matrices (through functions defined by Eigen) of the correct type.
-        - Eliminate the verbosity of declaring Eigen library fixed matrix types.
-    - public constant A, B, C, D
-        - Eliminate the need for trivial getters ([C.131](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#c131-avoid-trivial-getters-and-setters)). It doesn't make sense for the system dynamics of a plant to be modified after initialization (LTI).
-    - protected state and output
-        - Standard encapsulation.
 - constructor
     - deleted default constructor
         - In general, it doesn't make sense to create a Plant without any dynamics.
@@ -77,9 +107,6 @@ This living document is intended to lay out some design decisions and non-obviou
             - This is also why the template parameter num_outputs has a default argument of num_states.
         - It is more common to need to specify a nonzero initial state vector x than to define D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
             - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
-- copy-control.
-    - none explicitly defined (Rule of Zero).
-    - all are synthesized(?)
 
 *DiscretePlant*
 - *namespace dynamical::lti::sim*
@@ -99,9 +126,9 @@ This living document is intended to lay out some design decisions and non-obviou
             - https://en.cppreference.com/w/cpp/chrono/time_point
 
 
-### state_space/controller.hpp
+#### lti/controller.hpp
 
-*Controller*
+*Feedback*
 - *namespace dynamical::lti*
 - *type: class template*
 
@@ -118,14 +145,12 @@ This living document is intended to lay out some design decisions and non-obviou
 - constructor
     - The order of parameters in Observer's constructors is mostly influenced by the order of Plant's constructor. It can be argued that there are situations where users wouldn't specify an initial state estimate (in which case a default argument of zeros would be appropriate), but at this point users should understand they can just pass in *EigenMatrixType::Zero()*.
 
+*Controller*
+- *namespace dynamical::lti*
+- *type: class template*
 
-### state_space/analysis.hpp
 
-Overall notes:
-- The current implementation looks pretty cluttered. But template definitions shouldn't be separated from their declarations, so I'm not really sure how to make this better.
-    - TODO: is there a better way to organize this or just leave it as is?
-- The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html), so I spelt out matrix types even where using *auto* would make sense. This should result in better-guaranteed correctness at the expense of verbosity (and maybe readability).
-- TODO: look into some kind of "verbose" option that users can set, which enables diagnostic prints.
+#### lti/analysis.hpp
 
 *get_controllability_matrix*
 - *namespace dynamical::lti::analysis*
@@ -147,3 +172,10 @@ Overall notes:
 - This function implements continuous-time plant discretization as taught in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/). 
     - This method uses the eigenbasis (which isn't guaranteed to be real even if your matrix is real) for diagonalization. At first I tried to optimize for cases where the eigenbasis actually is real to avoid the overhead of *std::complex*, but it became a long struggle with the Eigen library's type deduction/conversion rules. I ended up just sticking with *std::complex< double >* for everything, so all DiscretePlant instances created by this function have a complex double Scalar type regardless of what ContinuousPlant is passed in.
 - TODO: overload with an implementation that doesn't rely on an invertible eigenbasis?
+
+
+### trajectory/
+
+#### trajectory/trajectory.hpp
+
+#### trajectory/min_energy.hpp

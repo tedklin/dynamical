@@ -1,6 +1,6 @@
-#include "dynamical/state_space/controller.hpp"
+#include "dynamical/lti/controller.hpp"
 
-#include "dynamical/state_space/plant.hpp"
+#include "dynamical/lti/plant.hpp"
 #include "dynamical/utils/test_utils.hpp"
 
 #include <iostream>

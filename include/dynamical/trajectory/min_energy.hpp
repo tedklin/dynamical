@@ -1,34 +1,21 @@
 #pragma once
 
+#include "dynamical/trajectory/trajectory.hpp"
 #include "dynamical/utils/exception.hpp"
 
 #include "Eigen/Dense"
 
-namespace dynamical {
-namespace trajectory {
-
-template <int state_dim, int input_dim, typename Scalar = double>
-class Trajectory {
- public:
-  using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
-  using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
-
-  virtual ~Trajectory() = default;
-
-  virtual x_VectorType GetDesiredState(int step) = 0;
-
-  virtual u_VectorType GetFeedforward(int step) { return u_VectorType::Zero(); }
-};
-
-// CAUTION: THE CURRENT IMPLEMENTATION FOR MIN ENERGY CONTROL HAS LARGELY
-// UNKNOWN BEHAVIOR! SEE trajectory_test.cpp FOR MORE INFORMATION!
+// CAUTION: THE CURRENT IMPLEMENTATION FOR MIN ENERGY CONTROL HAS SOME
+// UNKNOWN BEHAVIOR! SEE min_energy_test.cpp FOR MORE INFORMATION!
 //
 // Also note that I'm not entirely sure if this is a valid method for
 // multiple-input systems.
 //
 // TODO: revisit this
-//
-//
+
+namespace dynamical {
+namespace trajectory {
+
 // Uses the minimum norm solution to create a zero-indexed stepwise trajectory.
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 //

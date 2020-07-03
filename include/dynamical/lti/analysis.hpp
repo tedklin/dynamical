@@ -1,12 +1,16 @@
 #pragma once
 
-#include "dynamical/state_space/controller.hpp"
-#include "dynamical/state_space/plant.hpp"
+#include "dynamical/lti/controller.hpp"
+#include "dynamical/lti/plant.hpp"
 #include "dynamical/utils/exception.hpp"
 
 #include <cmath>
 #include <complex>
 #include <iostream>
+
+// Various analysis functions, including controllability/observability checks,
+// stability checks, and discretization (by diagonalization) of continuous-time
+// plant models.
 
 namespace dynamical {
 namespace lti {

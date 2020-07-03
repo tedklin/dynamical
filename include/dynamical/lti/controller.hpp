@@ -1,11 +1,13 @@
 #pragma once
 
-#include "dynamical/state_space/plant.hpp"
-#include "dynamical/state_space/trajectory.hpp"
+#include "dynamical/lti/plant.hpp"
+#include "dynamical/trajectory/trajectory.hpp"
 
 #include <memory>
 
 #include "Eigen/Dense"
+
+// State feedback controller.
 
 namespace dynamical {
 namespace lti {
@@ -13,8 +15,6 @@ namespace lti {
 template <int state_dim, int input_dim, typename Scalar = double>
 class Feedback {
  public:
-  // TODO: figure out how to forward types from a completely unrelated template
-  // (in this case, Plant<..>)
   using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
   using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
@@ -23,6 +23,8 @@ class Feedback {
   // the two by ensuring our trajectories output reference signals with the
   // appropriate dimensions.
   using K_MatrixType = Eigen::Matrix<Scalar, input_dim, state_dim>;
+
+  Feedback() = delete;
 
   explicit Feedback(const K_MatrixType& K,
                     const K_MatrixType& K_ref = K_MatrixType::Zero())

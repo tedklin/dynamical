@@ -1,6 +1,7 @@
-#include "dynamical/state_space/trajectory.hpp"
-#include "dynamical/state_space/analysis.hpp"
-#include "dynamical/state_space/plant.hpp"
+#include "dynamical/trajectory/min_energy.hpp"
+
+#include "dynamical/lti/analysis.hpp"
+#include "dynamical/lti/plant.hpp"
 #include "dynamical/utils/test_utils.hpp"
 
 #include <iostream>

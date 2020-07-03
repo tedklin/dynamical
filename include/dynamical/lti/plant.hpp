@@ -6,6 +6,8 @@
 
 #include "Eigen/Dense"
 
+// Simulation for plants.
+
 namespace dynamical {
 namespace lti {
 namespace sim {

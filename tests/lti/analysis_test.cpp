@@ -1,6 +1,6 @@
-#include "dynamical/state_space/analysis.hpp"
+#include "dynamical/lti/analysis.hpp"
 
-#include "dynamical/state_space/plant.hpp"
+#include "dynamical/lti/plant.hpp"
 #include "dynamical/utils/test_utils.hpp"
 
 #include <cmath>
