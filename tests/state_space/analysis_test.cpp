@@ -293,9 +293,10 @@ TEST(Stability, Discrete_Sim) {
       dynamical::lti::sim::DiscretePlant<num_states, num_inputs>;
   using Feedback = dynamical::lti::Feedback<num_states, num_inputs>;
 
-  int stable_systems_generated = 0, controllable_systems_generated = 0;
+  int stable_systems_generated = 0, controllable_systems_generated = 0,
+      total_systems_generated = 50;
 
-  for (int i = 0; i != 50; ++i) {
+  for (int i = 0; i != total_systems_generated; ++i) {
     std::cout << "========================\n";
     std::cout << "discrete stability test #" << i << ":\n\n";
 
@@ -358,6 +359,8 @@ TEST(Stability, Discrete_Sim) {
 
   std::cout << "========================\n";
   std::cout << "TEST END\n";
+  std::cout << "total number of systems generated: " << total_systems_generated
+            << '\n';
   std::cout << "number of controllable systems generated: "
             << controllable_systems_generated << '\n';
   std::cout << "number of stable systems generated: "

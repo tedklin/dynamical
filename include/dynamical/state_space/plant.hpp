@@ -35,15 +35,15 @@ class Plant {
 
   virtual void Update(const u_VectorType& u) = 0;
 
+  const x_VectorType& GetX() const { return x_; }
+
+  const y_VectorType& GetY() const { return y_; }
+
   void ResetToXInitial() { x_ = x_initial_; }
 
   void SetXInitial(const x_VectorType& initial_x) { x_initial_ = initial_x; }
 
   const x_VectorType& GetXInitial() const { return x_initial_; }
-
-  const x_VectorType& GetX() const { return x_; }
-
-  const y_VectorType& GetY() const { return y_; }
 
   const A_MatrixType A_;
   const B_MatrixType B_;
@@ -81,7 +81,7 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
-  // TODO: implement this real-time?
+  // TODO: implement this real-time? or self-generated noisy time inputs?
   // map to discretized plants? or UpdateSim?
   void Update(const u_VectorType& u) override {}
 

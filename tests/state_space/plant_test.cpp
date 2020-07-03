@@ -95,7 +95,7 @@ TEST(Plant, PropagateDiscreteDynamics) {
 
 // note: this is doubling as a proxy test for
 // dynamical::numerical::integral:rk4() for now.
-TEST(Plant, PropagateContinuousDynamics_Sim) {
+TEST(Plant, PropagateContinuousDynamics) {
   // Compare the accuracy of runge-kutta against a model that was discretized by
   // diagonalization.
 
@@ -127,11 +127,6 @@ TEST(Plant, PropagateContinuousDynamics_Sim) {
     ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(
         discrete_plant.GetX(), continuous_plant.GetX(), 1e-2));
   }
-}
-
-TEST(Plant, PropagateContinuousDynamics_RT) {
-  // IRL, we would probably gather a bunch of data from the actual continuous
-  // system (if we could) and test the discretized model against that.
 }
 
 }  // namespace dynamical_testing
