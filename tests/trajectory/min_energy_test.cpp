@@ -53,15 +53,16 @@ TEST(Trajectory, MinEnergy_Simple) {
       dynamical_test_utils::check_matrix_equality(target_state, plant.GetX()));
 }
 
-// THIS TEST IS CURRENTLY FAILING FOR BOTH SISO AND MIMO SYSTEMS
-// The minimum energy control trajectory generation doesn't always work with
-// randomly generated floating point matrices. There are two possible
-// explanations I can think of right now:
-//    - there are conditions besides controllability for this to work
-//    - the method of calculation is sensitive to floating point numbers
-//    (perhaps numbers that are too small?)
+// This test gives more insight on the effectiveness of the current minimum
+// energy trajectory generation method.
 //
-// TODO: revisit this
+// From inspecting the output, it seems that 9 times out of 10, the min energy
+// path effectively gets the simulated plant to the target. There are also
+// several cases where the plant gets close but doesn't quite reach the target
+// (could be corrected easily by feedback). However, there are also a few
+// cases where the plant goes way off (largest error I've seen was 500%).
+//
+// TODO: figure out what causes these errors in min energy path creation.
 TEST(Trajectory, MinEnergy_Random) {
   // Test a variety of (controllable) random MIMO systems with varying number of
   // allowed steps.
@@ -72,7 +73,11 @@ TEST(Trajectory, MinEnergy_Random) {
   using MinEnergy = dynamical::trajectory::MinEnergy<num_states, num_inputs>;
 
   int controllable_systems_generated = 0, total_systems_generated = 50;
-  int num_steps = 5;
+
+  // Increasing the number of steps increases the chances of generating a
+  // singular controllability matrix (the current min energy path method relies
+  // on an invertible controllability matrix).
+  int num_steps = 10;
 
   for (int i = 0; i != total_systems_generated; ++i) {
     std::cout << "========================\n";
@@ -81,6 +86,10 @@ TEST(Trajectory, MinEnergy_Random) {
     SimplePlant::A_MatrixType A = SimplePlant::A_MatrixType::Random();
     SimplePlant::B_MatrixType B = SimplePlant::B_MatrixType::Random();
     SimplePlant::x_VectorType x_initial = SimplePlant::x_VectorType::Random();
+
+    std::cout << "A:\n" << A << "\n\n";
+    std::cout << "B:\n" << B << "\n\n";
+    std::cout << "x_initial:\n" << x_initial << "\n\n";
 
     SimplePlant plant(x_initial, A, B);
 
@@ -104,10 +113,11 @@ TEST(Trajectory, MinEnergy_Random) {
       MinEnergy::u_VectorType u = trajectory.GetFeedforward(step);
       plant.Update(u);
 
-      std::cout << "step #" << step << ":\n";
-      std::cout << "input:\n" << u << "\n\n";
-      std::cout << "state:\n" << plant.GetX() << "\n\n";
+      // std::cout << "step #" << step << ":\n";
+      // std::cout << "input:\n" << u << "\n\n";
+      // std::cout << "state:\n" << plant.GetX() << "\n\n";
     }
+    std::cout << "end state:\n" << plant.GetX() << "\n\n";
     std::cout << "target state:\n" << target_state << "\n\n";
 
     // ASSERT_TRUE(dynamical_test_utils::check_matrix_equality(target_state,

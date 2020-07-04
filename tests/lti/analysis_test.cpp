@@ -445,7 +445,7 @@ TEST(Discretization, Dynamics_NoInput_Exponential) {
 }
 
 TEST(Discretization, SimpleSecondOrder) {
-  // An example of a system that can't be solved by diagonlization.
+  // An example of a system that can't be solved by diagonalization.
   // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 2;

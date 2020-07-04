@@ -93,8 +93,8 @@ TEST(Plant, PropagateDiscreteDynamics) {
   }
 }
 
-// note: this is doubling as a proxy test for
-// dynamical::numerical::integral:rk4() for now.
+// Note: this is doubling as a proxy test for
+// dynamical::numerical::integral:rk4().
 TEST(Plant, PropagateContinuousDynamics) {
   // Compare the accuracy of runge-kutta against a model that was discretized by
   // diagonalization.

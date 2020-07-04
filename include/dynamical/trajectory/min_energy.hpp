@@ -6,32 +6,29 @@
 
 #include "Eigen/Dense"
 
-// CAUTION: THE CURRENT IMPLEMENTATION FOR MIN ENERGY CONTROL HAS SOME
-// UNKNOWN BEHAVIOR! SEE min_energy_test.cpp FOR MORE INFORMATION!
+// Uses the minimum norm solution to create a zero-indexed stepwise trajectory.
+// https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 //
-// Also note that I'm not entirely sure if this is a valid method for
-// multiple-input systems.
+// The result of C^T * (C * C^T)^-1 * x_target is:
+// [[ u[num_steps_ - 1]` ],
+//  [ u[num_steps_ - 2]` ],
+//  .
+//  .
+//  [ u[1]` ],
+//  [ u[0]` ]]
+// where each u` is itself a column vector {rows=input_dim, cols=1}.
+// Each u` is the reverse of the actual input u we want.
 //
-// TODO: revisit this
+//
+// I'm not entirely sure about the reliability of this. For one, the
+// controllability matrix has to be invertible, which means there's an arbitrary
+// cap on the number of steps you can take (large increases in number of steps
+// ups the chance of getting linearly dependent columns). The accuracy is also
+// not always satisfactory, see min_energy_test.cpp for more information.
 
 namespace dynamical {
 namespace trajectory {
 
-// Uses the minimum norm solution to create a zero-indexed stepwise trajectory.
-// https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
-//
-// The resultant input sequence encoded in "inverted_input_sequence_" is of the
-// form:
-// [[ u[num_steps_ - 1] ],
-//  [ u[num_steps_ - 2] ],
-//  .
-//  .
-//  [ u[1] ],
-//  [ u[0] ]]
-// where each u is a **column** vector of dimension: rows=input_dim, cols=1
-//
-// Note that the entire "inverted_input_sequence_" is a column vector regardless
-// of the input dimension.
 template <int state_dim, int input_dim, typename Scalar = double>
 class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
  public:
@@ -55,8 +52,9 @@ class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
           "min energy trajectory: controllability matrix not invertible.");
     }
 
-    inverted_input_sequence_ =
+    input_sequence_ =
         controllability_matrix_.transpose() * C_CT.inverse() * target_state_;
+    input_sequence_.reverseInPlace();
   }
 
   x_VectorType GetDesiredState(int step) {
@@ -70,10 +68,7 @@ class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
           "min energy trajectory: tried to access step out of range!");
     }
 
-    // input sequence is inverted: the first step (step 0) corresponds to the
-    // last row (num_steps_ - 1) of the matrix.
-    step = num_steps_ - 1 - step;
-    return inverted_input_sequence_.block(step * input_dim, 0, input_dim, 1);
+    return input_sequence_.block(step * input_dim, 0, input_dim, 1);
   }
 
   const ControllabilityMatrixType controllability_matrix_;
@@ -81,7 +76,7 @@ class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
   const x_VectorType target_state_;
 
  private:
-  Eigen::Matrix<Scalar, Eigen::Dynamic, 1> inverted_input_sequence_;
+  Eigen::Matrix<Scalar, Eigen::Dynamic, 1> input_sequence_;
 };
 
 }  // namespace trajectory

@@ -3,7 +3,6 @@
 #include "dynamical/math/integral.hpp"
 
 #include <cmath>
-#include <iostream>  // TODO: remove after debugging
 #include <memory>
 #include <random>
 
@@ -130,7 +129,8 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
-  // TODO: what to use as time? map to discretized plants? or UpdateSim?
+  // TODO: what to use as time?
+  // implement by map to discretized plants or UpdateSim?
   void Update(const u_VectorType& u) override {}
 
   // runge kutta with zero-order hold
