@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dynamical/trajectory/trajectory.hpp"
+
 #include "dynamical/utils/exception.hpp"
 
 #include "Eigen/Dense"
@@ -27,7 +28,7 @@ namespace trajectory {
 //  .
 //  [ u[1] ],
 //  [ u[0] ]]
-// where each u is a **column** vector of dimension (row=input_dim, col=1).
+// where each u is a **column** vector of dimension: rows=input_dim, cols=1
 //
 // Note that the entire "inverted_input_sequence_" is a column vector regardless
 // of the input dimension.

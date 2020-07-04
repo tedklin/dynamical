@@ -2,6 +2,8 @@
 
 #include "Eigen/Dense"
 
+// Abstract base class for all trajectories.
+
 namespace dynamical {
 namespace trajectory {
 

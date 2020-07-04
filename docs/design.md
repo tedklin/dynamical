@@ -31,18 +31,18 @@ This living document is intended to lay out some design decisions and non-obviou
 
 
 ## Overall control system design notes
-- Most of the math is implemented with techniques we learned in EECS16B, but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
+- Most of the math is implemented with techniques we learned in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/), but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
     - A&M notes that it prefers "reachability" to "controllability", and they're technically not the same thing, but in the context of 16B they're the same thing and we use the term "controllability".
 - I'm not really sure if the order I'm executing things is proper. The current implementation is mostly based on the equations in the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer).
 
 
 ## Overall C++ design notes
-- Heavy use of templates
+- Heavy use of templates.
     - Things get pretty messy at times but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
 - Namespaces designed to be very specific (around three levels) to signify intention clearly.
     - I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
-- Avoid *auto* with Eigen types, even where it makes sense.
+- Avoided *auto* with Eigen types, even where it makes sense.
     - Reasoning
         - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html)
         - Better-guaranteed correctness if everything is just spelt out.
@@ -71,7 +71,7 @@ This living document is intended to lay out some design decisions and non-obviou
     - Reasoning:
         - Rule of Zero.
     - TODO:
-        - investigate what happens under the hood.
+        - investigate what happens under the hood for all types that I don't explicitly define copy-control for.
 - Many of my functions that aren't part of a class return by value.
     - Reasoning:
         - More guaranteed behavior.
@@ -107,6 +107,10 @@ This living document is intended to lay out some design decisions and non-obviou
             - This is also why the template parameter num_outputs has a default argument of num_states.
         - It is more common to need to specify a nonzero initial state vector x than to define D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
             - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
+- gaussian noise generator
+    - [Eigen docs for *NullaryExpr*](https://eigen.tuxfamily.org/dox/classEigen_1_1DenseBase.html#a57fed90701b138c1d38ec52871f4cef1)
+    - The current implementation is a pair of unique_ptrs to both the generator (std::mt19937) and the distribution (std::normal_distribution<>). The presence of unique_ptrs is what forced me to define the copy-constructor and copy-assign member.
+    - An alternative might be to define another type purely for random generation of Eigen matrices with more controlled / complex distributions than the one given by Random()?
 
 *DiscretePlant*
 - *namespace dynamical::lti::sim*

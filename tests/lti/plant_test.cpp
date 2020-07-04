@@ -129,4 +129,40 @@ TEST(Plant, PropagateContinuousDynamics) {
   }
 }
 
+// TODO: figure out scheme to actually evaluate this instead of just reading
+// output
+TEST(Plant, GaussianNoise) {
+  // Observe the effects of the gaussian noise generator on a static plant.
+
+  constexpr int num_states = 3, num_inputs = 1;
+  using SimplePlant =
+      dynamical::lti::sim::DiscretePlant<num_states, num_inputs>;
+
+  SimplePlant::x_VectorType x;
+  x << 1, 1, 0;  // we should see the output have this column vector as the mean
+  SimplePlant plant(x, SimplePlant::A_MatrixType::Identity(),
+                    SimplePlant::B_MatrixType::Zero());
+
+  std::cout << "=============\nrealistic noise\n\n";
+  plant.EnableNoise(0.1);
+  for (int i = 0; i != 20; ++i) {
+    plant.Update(SimplePlant::u_VectorType::Zero());
+    std::cout << plant.GetY() << "\n\n";
+  }
+
+  std::cout << "=============\na lot of noise\n\n";
+  plant.EnableNoise(1);
+  for (int i = 0; i != 10; ++i) {
+    plant.Update(SimplePlant::u_VectorType::Zero());
+    std::cout << plant.GetY() << "\n\n";
+  }
+
+  std::cout << "=============\nno noise\n\n";
+  plant.DisableNoise();
+  for (int i = 0; i != 10; ++i) {
+    plant.Update(SimplePlant::u_VectorType::Zero());
+    std::cout << plant.GetY() << "\n\n";
+  }
+}
+
 }  // namespace dynamical_testing

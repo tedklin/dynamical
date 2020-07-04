@@ -1,6 +1,6 @@
 #pragma once
 
-#include <functional>
+#include <functional>  // for std::function
 
 // Numerical integration methods.
 
@@ -39,6 +39,5 @@ T rk4(const F& dy_dt, T y0, double dt) {
 // TODO: test other numerical integration methods?
 
 }  // namespace integral
-
 }  // namespace numerical
 }  // namespace dynamical

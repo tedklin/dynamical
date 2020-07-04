@@ -8,6 +8,8 @@
 #include <complex>
 #include <iostream>
 
+#include "Eigen/Dense"
+
 // Various analysis functions, including controllability/observability checks,
 // stability checks, and discretization (by diagonalization) of continuous-time
 // plant models.
