@@ -13,6 +13,8 @@
 // Various analysis functions, including controllability/observability checks,
 // stability checks, and discretization (by diagonalization) of continuous-time
 // plant models.
+//
+// TODO: try to improve readability
 
 namespace dynamical {
 namespace lti {

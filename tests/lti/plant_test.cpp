@@ -119,7 +119,7 @@ TEST(Plant, PropagateContinuousDynamics) {
     for (int step = 0; step != 1000; ++step) {
       ContinuousPlant::u_VectorType u_cont =
           ContinuousPlant::u_VectorType::Random();
-      continuous_plant.UpdateSim(u_cont, dt);
+      continuous_plant.Update(u_cont, dt);
       discrete_plant.Update(u_cont);
     }
 

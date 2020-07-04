@@ -96,6 +96,11 @@ class Plant {
   double noise_stddev_ = 0;
   std::unique_ptr<std::mt19937> random_generator_;
   std::unique_ptr<std::normal_distribution<>> noise_distribution_;
+
+  y_VectorType GenerateOutputNoise() {
+    return y_VectorType::NullaryExpr(
+        [&]() { return (*noise_distribution_)(*random_generator_); });
+  }
 };
 
 template <int state_dim, int input_dim, int output_dim = state_dim,
@@ -112,10 +117,7 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
     this->x_ = this->A_ * this->x_ + this->B_ * u;
 
     if (this->noise_present_) {
-      y_VectorType y_noise = y_VectorType::NullaryExpr([&]() {
-        return (*(this->noise_distribution_))(*(this->random_generator_));
-      });
-      this->y_ += y_noise;
+      this->y_ += this->GenerateOutputNoise();
     }
   }
 };
@@ -129,14 +131,20 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
-  void SetTimestep(double timestep) { timestep_ = timestep }
+  void SetTimestep(double timestep) { timestep_ = timestep; }
 
   // TODO: consider using discretization method in analysis.hpp?
-  void Update(const u_VectorType& u) override { UpdateSim(u, timestep_); }
+  void Update(const u_VectorType& u) override {
+    Update(u, timestep_);
+
+    if (this->noise_present_) {
+      this->y_ += this->GenerateOutputNoise();
+    }
+  }
 
   // runge kutta with zero-order hold
   // https://math.stackexchange.com/questions/2946737/
-  void UpdateSim(const u_VectorType& u, double dt) {
+  void Update(const u_VectorType& u, double dt) {
     this->y_ = this->C_ * this->x_ + this->D_ * u;
     this->x_ = numerical::integral::rk4(
         [&](const x_VectorType& x) -> x_VectorType {
