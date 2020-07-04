@@ -39,10 +39,10 @@ This living document is intended to lay out some design decisions and non-obviou
 
 ## Overall C++ design notes
 - Heavy use of templates.
-    - Things get pretty messy at times but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
+    - Things get pretty messy at times (see lti/analysis.hpp) but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
 - Namespaces designed to be very specific (around three levels) to signify intention clearly.
     - I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
-- Avoided *auto* with Eigen types, even where it makes sense.
+- Avoided *auto* with Eigen types, even where it makes sense / passes tests.
     - Reasoning
         - The Eigen library [doesn't play well with *auto* type deduction](https://eigen.tuxfamily.org/dox/TopicPitfalls.html)
         - Better-guaranteed correctness if everything is just spelt out.
@@ -122,9 +122,9 @@ This living document is intended to lay out some design decisions and non-obviou
 *ContinuousPlant*
 - *namespace dynamical::lti::sim*
 - *type: class template implementation of Plant*
-- overall notes:
-    - TODO: check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
-    - TODO: implement Update() as real-time update?
+- TODO:
+    - check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
+    - implement Update() as real-time update?
         - std::chrono
             - https://en.cppreference.com/w/cpp/chrono/duration
             - https://en.cppreference.com/w/cpp/chrono/time_point
@@ -159,8 +159,9 @@ This living document is intended to lay out some design decisions and non-obviou
 *get_controllability_matrix*
 - *namespace dynamical::lti::analysis*
 - *type: function template*
-- I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
-    - TODO: understand this better.
+- TODO:
+    - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
+    - understand this better.
 
 *get_observability_matrix*
 - *namespace dynamical::lti::analysis*
@@ -175,11 +176,18 @@ This living document is intended to lay out some design decisions and non-obviou
 - *type: function template*
 - This function implements continuous-time plant discretization as taught in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/). 
     - This method uses the eigenbasis (which isn't guaranteed to be real even if your matrix is real) for diagonalization. At first I tried to optimize for cases where the eigenbasis actually is real to avoid the overhead of *std::complex*, but it became a long struggle with the Eigen library's type deduction/conversion rules. I ended up just sticking with *std::complex< double >* for everything, so all DiscretePlant instances created by this function have a complex double Scalar type regardless of what ContinuousPlant is passed in.
-- TODO: overload with an implementation that doesn't rely on an invertible eigenbasis?
+- TODO:
+    - overload with an implementation that doesn't rely on an invertible eigenbasis?
 
 
 ### trajectory/
 
 #### trajectory/trajectory.hpp
+- *namespace dynamical::trajectory*
+- *type: abstract class template*
 
 #### trajectory/min_energy.hpp
+- *namespace dynamical::trajectory*
+- *type: class template*
+- TODO:
+    - Not reliable at the moment! Need to figure out if I implemented soemthing wrong or if this method just doesn't play well with certain system characteristics.

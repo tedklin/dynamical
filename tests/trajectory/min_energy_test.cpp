@@ -56,11 +56,15 @@ TEST(Trajectory, MinEnergy_Simple) {
 // This test gives more insight on the effectiveness of the current minimum
 // energy trajectory generation method.
 //
-// From inspecting the output, it seems that 9 times out of 10, the min energy
-// path effectively gets the simulated plant to the target. There are also
-// several cases where the plant gets close but doesn't quite reach the target
-// (could be corrected easily by feedback). However, there are also a few
-// cases where the plant goes way off (largest error I've seen was 500%).
+// From inspecting the output, it seems that when the system matrices are small,
+// 9 times out of 10, the min energy path effectively gets the simulated plant
+// to the target. There are several cases where the plant gets close but doesn't
+// quite reach the target (could be corrected easily by feedback). There are
+// also a few cases where the plant goes way off (largest error I've seen was
+// 500%).
+//
+// However, when the matrices are large (more variance?), the min energy path
+// almost always leads the plant WAY off (on several orders of magnitude!).
 //
 // TODO: figure out what causes these errors in min energy path creation.
 TEST(Trajectory, MinEnergy_Random) {

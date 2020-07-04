@@ -129,9 +129,10 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
   using typename Plant<state_dim, input_dim, output_dim, Scalar>::x_VectorType;
 
-  // TODO: what to use as time?
-  // implement by map to discretized plants or UpdateSim?
-  void Update(const u_VectorType& u) override {}
+  void SetTimestep(double timestep) { timestep_ = timestep }
+
+  // TODO: consider using discretization method in analysis.hpp?
+  void Update(const u_VectorType& u) override { UpdateSim(u, timestep_); }
 
   // runge kutta with zero-order hold
   // https://math.stackexchange.com/questions/2946737/
@@ -143,6 +144,9 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
         },
         this->x_, dt);
   }
+
+ private:
+  double timestep_ = 0.01;
 };
 
 }  // namespace sim
