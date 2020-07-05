@@ -30,14 +30,34 @@ This living document is intended to lay out some design decisions and non-obviou
 4. Integrated solvers and implementations for optimal control (LQR, MPC, etc.)
 
 
-## Overall control system design notes
+## Current state of project
+
+Mostly finished:
+- Controllability
+- Stability and Feedback
+- Discretization
+
+Still testing / fixing:
+- Minimum energy trajectory
+- Observer concepts and Kalman filter
+    - Generating random noise in simulated plants
+- Complete State Feedback Controller simulation
+
+Later down the road:
+- Integration with ROS
+- Linearization
+- Optimization-based control
+- Stochastic processes
+
+## Theory notes
 - Most of the math is implemented with techniques we learned in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/), but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
     - The K matrix for feedback has a positive sign in this project, which is the same as [16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/13a.pdf). However, it has a negative sign in [A&M](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=State_Feedback).
     - A&M notes that it prefers "reachability" to "controllability", and they're technically not the same thing, but in the context of 16B they're the same thing and we use the term "controllability".
-- I'm not really sure if the order I'm executing things is proper. The current implementation is mostly based on the equations in the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer).
+- The order of calculation (specifically updating in Observers and Controllers) is mostly based on the equations in the Wikipedia pages for [*state-space*](https://en.wikipedia.org/wiki/State-space_representation) and [*state observer*](https://en.wikipedia.org/wiki/State_observer).
+    - At first this seemed to go against the "predict then correct" concept from the [Kalman filter](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/06-Multivariate-Kalman-Filters.ipynb), but it's really just computing the same thing in a different combination of steps.
 
 
-## Overall C++ design notes
+## C++ design notes
 - Heavy use of templates.
     - Things get pretty messy at times (see lti/analysis.hpp) but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
 - Namespaces designed to be very specific (around three levels) to signify intention clearly.
@@ -124,10 +144,6 @@ This living document is intended to lay out some design decisions and non-obviou
 - *type: class template implementation of Plant*
 - TODO:
     - check if synthesizing a lambda on every call to UpdateSim() significantly hurts performance or if it's better to just define a separate function representing the differential equations and point to it.
-    - implement Update() as real-time update?
-        - std::chrono
-            - https://en.cppreference.com/w/cpp/chrono/duration
-            - https://en.cppreference.com/w/cpp/chrono/time_point
 
 
 #### lti/controller.hpp
@@ -148,6 +164,13 @@ This living document is intended to lay out some design decisions and non-obviou
         - However, at the moment, I'm not sure about the practicality of actually using a complete state feedback controller based in continuous-time (numerical integration / time sync errors add up), so the current implementation is just for discrete time.
 - constructor
     - The order of parameters in Observer's constructors is mostly influenced by the order of Plant's constructor. It can be argued that there are situations where users wouldn't specify an initial state estimate (in which case a default argument of zeros would be appropriate), but at this point users should understand they can just pass in *EigenMatrixType::Zero()*.
+
+*KalmanFilter*
+- *namespace dynamical::lti*
+- *type: class template derived from Observer*
+- overall notes:
+    - For reference, the F and H matrices in the context of Kalman filters map to the A and C matrices in state-space context(?) The y passed into the Controller is just the measurement, which is denoted by z in the context of Kalman filters(?)
+    - **I haven't actually learned the background math for Kalman filtering yet, I just skimmed applicational/intuitive stuff from the link above and set it up within the project framework.**
 
 *Controller*
 - *namespace dynamical::lti*
@@ -190,4 +213,4 @@ This living document is intended to lay out some design decisions and non-obviou
 - *namespace dynamical::trajectory*
 - *type: class template*
 - TODO:
-    - Not reliable at the moment! Need to figure out if I implemented soemthing wrong or if this method just doesn't play well with certain system characteristics.
+    - Not reliable at the moment! Need to figure out if I implemented something wrong or if this method just doesn't play well with certain system characteristics.

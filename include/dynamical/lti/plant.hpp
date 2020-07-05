@@ -8,7 +8,7 @@
 
 #include "Eigen/Dense"
 
-// Simulation for plants.
+// Simulation for plants, with support for artificial noise.
 
 namespace dynamical {
 namespace lti {
@@ -70,14 +70,13 @@ class Plant {
 
   const x_VectorType& GetXInitial() const { return x_initial_; }
 
-  void EnableNoise(double new_noise_stddev) {
+  void EnableNoise(double noise_stddev) {
     noise_present_ = true;
 
     // TODO: profile this?
     std::random_device rd;
     random_generator_.reset(new std::mt19937(rd()));
-    noise_distribution_.reset(
-        new std::normal_distribution<>{0, new_noise_stddev});
+    noise_distribution_.reset(new std::normal_distribution<>{0, noise_stddev});
   }
 
   void DisableNoise() { noise_present_ = false; }
@@ -96,6 +95,9 @@ class Plant {
   double noise_stddev_ = 0;
   std::unique_ptr<std::mt19937> random_generator_;
   std::unique_ptr<std::normal_distribution<>> noise_distribution_;
+
+  // TODO: process noise
+  // TODO: different noise distributions for each scalar variable
 
   y_VectorType GenerateOutputNoise() {
     return y_VectorType::NullaryExpr(

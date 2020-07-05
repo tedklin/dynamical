@@ -64,4 +64,7 @@ TEST(Observer, MatchToNoiselessPlant) {
   }
 }
 
+// TODO: implement this
+TEST(Observer, KalmanFilter) {}
+
 }  // namespace dynamical_testing
