@@ -18,15 +18,6 @@ namespace dynamical {
 namespace lti {
 namespace analysis {
 
-// The controllability matrix generation method allows for the creation of
-// "wide" controllability matrices with a given number of steps. This has
-// applications in things like minimum energy control.
-//
-// The default controllability matrix (without specifying a number of steps)
-// checks just enough steps to verify its rank == state dimension of the system.
-//
-// https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8b.pdf
-//
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
     const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant,

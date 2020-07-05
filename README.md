@@ -4,7 +4,7 @@
 
 *DynamiCal* is a (WIP) control systems framework that aims to be both educational and applicable, with an intuitive interface and careful software design in C++.
 
-*DynamiCal* was born out of a desire to further explore some ideas taught in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). These concepts included things like state-space representation, stability, feedback, and more. While 16B covered these from a more theoretical perspective, I wanted to see how the theory translated to real life.
+This project was born out of a desire to further explore some ideas taught in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). These concepts included things like state-space representation, stability, feedback, and more. While 16B covered these from a more theoretical perspective, I wanted to see how the theory translated to real life.
 
 Of course, I don't actually have tons of physical mobile robots at my disposal (anymore), so this project focuses on learning / testing through simulations, while simultaneously setting up a framework for potential real-world use.
 

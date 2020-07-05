@@ -26,8 +26,8 @@ This living document is intended to lay out some design decisions and non-obviou
 
 1. Discrete-time linear control system design
 2. Linear systems simulation and analysis
-3. Nonlinear control system design (onboard linearization)
-4. Integrated solvers and implementations for optimal control (LQR, MPC, etc.)
+3. Nonlinear control system design
+4. Integrated solvers and implementations for optimal control
 
 
 ## Current state of project
@@ -36,6 +36,7 @@ Mostly finished:
 - Controllability
 - Stability and Feedback
 - Discretization
+- Simple simulations
 
 Still testing / fixing:
 - Minimum energy trajectory
@@ -46,8 +47,10 @@ Still testing / fixing:
 Later down the road:
 - Integration with ROS
 - Linearization
+- Gain scheduling
 - Optimization-based control
 - Stochastic processes
+
 
 ## Theory notes
 - Most of the math is implemented with techniques we learned in [EECS16B](https://inst.eecs.berkeley.edu/~ee16b/sp20/), but the overall control system structure is based on [parts of Astrom and Murray (A&M)](http://www.cds.caltech.edu/~murray/books/AM08/pdf/am08-outputfbk_28Sep12.pdf). There are some (mostly trivial) clashes in convention between the two sources:
@@ -182,13 +185,16 @@ Later down the road:
 *get_controllability_matrix*
 - *namespace dynamical::lti::analysis*
 - *type: function template*
+- overall notes:
+    - The controllability matrix generation method allows for the creation of "wide" controllability matrices with a given number of steps. This has applications in things like minimum energy control. The default controllability matrix (without specifying a number of steps) checks just enough steps to verify its rank == state dimension of the system.
 - TODO:
     - I'm not entirely sure what goes on behind the scenes when I use a template argument (*state_dim*) directly as a default argument for the *num_steps* parameter, but tests have shown that this works.
-    - understand this better.
 
 *get_observability_matrix*
 - *namespace dynamical::lti::analysis*
 - *type: function template*
+- overall notes:
+    - This was implemented in a very similar way to *get_controllability_matrix*, but I don't know if there's any meaning behind specifying a "number of steps" for observability.
 
 *is_stable*
 - *namespace dynamical::lti::analysis*
