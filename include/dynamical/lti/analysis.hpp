@@ -155,7 +155,6 @@ bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
 }
 
 // Discretization by diagonalization.
-// The returned discrete model has complex Scalar type std::complex<double>.
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/8a.pdf
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 sim::DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
