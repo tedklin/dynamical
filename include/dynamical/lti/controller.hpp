@@ -98,12 +98,6 @@ class Observer {
   L_MatrixType L_;
 };
 
-// Reference: https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python
-//
-// The given y in UpdateEstimate is the measurement "z".
-// L is the Kalman gain "K".
-// C is the measurement function "H".
-//
 template <int state_dim, int input_dim, int output_dim,
           typename Scalar = double>
 class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {

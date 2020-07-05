@@ -40,15 +40,15 @@ Mostly finished:
 
 Still testing / fixing:
 - Minimum energy trajectory
-- Observer concepts and Kalman filter
-    - Generating random noise in simulated plants
-- Complete State Feedback Controller simulation
+- Observer concepts and Kalman filter in discrete-time
+    - Random noise generation in simulated plants
+- Complete discrete-time State Feedback Controller simulation
 
 Later down the road:
 - Integration with ROS
 - Linearization
 - Gain scheduling
-- Optimization-based control
+- More optimization-based control
 - Stochastic processes
 
 
@@ -172,8 +172,9 @@ Later down the road:
 - *namespace dynamical::lti*
 - *type: class template derived from Observer*
 - overall notes:
-    - For reference, the F and H matrices in the context of Kalman filters map to the A and C matrices in state-space context(?) The y passed into the Controller is just the measurement, which is denoted by z in the context of Kalman filters(?)
-    - **I haven't actually learned the background math for Kalman filtering yet, I just skimmed applicational/intuitive stuff from the link above and set it up within the project framework.**
+    - [Kalman filter information](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/06-Multivariate-Kalman-Filters.ipynb)
+        - For reference, the F and H matrices in the context of Kalman filters map to the A and C matrices in state-space context. The measurement z maps to the y passed into the Controller. The optimal "Kalman gain" maps to the observer gain L.
+        - I haven't fully learned the background math for Kalman filtering yet, I just skimmed applicational/intuitive stuff from the link above and set it up within the project framework.
 
 *Controller*
 - *namespace dynamical::lti*
