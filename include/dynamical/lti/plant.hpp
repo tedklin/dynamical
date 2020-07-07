@@ -33,7 +33,10 @@ class Plant {
   Plant(const x_VectorType& x_initial, const A_MatrixType& A,
         const B_MatrixType& B, const C_MatrixType& C = C_MatrixType::Identity(),
         const D_MatrixType& D = D_MatrixType::Zero())
-      : A_(A), B_(B), C_(C), D_(D), x_initial_(x_initial), x_(x_initial) {}
+      : A_(A), B_(B), C_(C), D_(D), x_initial_(x_initial), x_(x_initial) {
+    std::random_device rd;
+    random_generator_.reset(new std::mt19937(rd()));
+  }
 
   // TODO: revisit copy-control members' treatment of the unique_ptrs
   Plant(const Plant& other)
@@ -43,7 +46,10 @@ class Plant {
         D_(other.D_),
         x_initial_(other.x_initial_),
         x_(other.x_),
-        y_(other.y_) {}
+        y_(other.y_) {
+    std::random_device rd;
+    random_generator_.reset(new std::mt19937(rd()));
+  }
 
   Plant& operator=(const Plant& rho) {
     A_ = rho.A_;
@@ -53,8 +59,12 @@ class Plant {
     x_initial_ = (rho.x_initial);
     x_ = (rho.x_);
     y_ = (rho.y_);
+
     noise_present_ = false;
     noise_stddev_ = 0;
+    std::random_device rd;
+    random_generator_.reset(new std::mt19937(rd()));
+
     return *this;
   }
 
@@ -74,8 +84,6 @@ class Plant {
     noise_present_ = true;
 
     // TODO: profile this?
-    std::random_device rd;
-    random_generator_.reset(new std::mt19937(rd()));
     noise_distribution_.reset(new std::normal_distribution<>{0, noise_stddev});
   }
 
@@ -97,7 +105,8 @@ class Plant {
   std::unique_ptr<std::normal_distribution<>> noise_distribution_;
 
   // TODO: process noise
-  // TODO: different noise distributions for each scalar variable
+  // TODO: different noise distributions for each scalar variable (pass in a
+  // vector for stddev)
 
   y_VectorType GenerateOutputNoise() {
     return y_VectorType::NullaryExpr(

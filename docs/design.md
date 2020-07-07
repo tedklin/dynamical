@@ -47,9 +47,9 @@ Still testing / fixing:
 Later down the road:
 - Integration with ROS
 - Linearization
-- Gain scheduling
-- More optimization-based control
-- Stochastic processes
+- Gain scheduling?
+- More optimization-based control?
+- Stochastic processes?
 
 
 ## Theory notes
@@ -62,7 +62,8 @@ Later down the road:
 
 ## C++ design notes
 - Heavy use of templates.
-    - Things get pretty messy at times (see lti/analysis.hpp) but I don't really see another rational way to express the dependency on system dimensions (number of states, inputs, and outputs).
+    - I initially saw the use of templates to encode the dimensions of a system (number of states, inputs, and outputs) in [ETH Zurich's *control-toolbox* library](https://github.com/ethz-adrl/control-toolbox).
+    - Things get pretty messy at times (see lti/analysis.hpp), but I don't really see another rational way to express the absolute dependency on system dimensions.
 - Namespaces designed to be very specific (around three levels) to signify intention clearly.
     - I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
 - Avoided *auto* with Eigen types, even where it makes sense / passes tests.

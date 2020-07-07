@@ -9,6 +9,8 @@
 // Uses the minimum norm solution to create a zero-indexed stepwise trajectory.
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 //
+// Let C be the controllability matrix of the system (not the same C as the
+// measurement matrix).
 // The result of C^T * (C * C^T)^-1 * x_target is:
 // [[ u[num_steps_ - 1]` ],
 //  [ u[num_steps_ - 2]` ],
@@ -20,10 +22,7 @@
 // Each u` is the reverse of the actual input u we want.
 //
 //
-// I'm not entirely sure about the reliability of this. For one, the
-// controllability matrix has to be invertible, which means there's an arbitrary
-// cap on the number of steps you can take (large increases in number of steps
-// ups the chance of getting linearly dependent columns). The accuracy is also
+// I'm not entirely sure about the reliability of this. The accuracy is
 // not always satisfactory, see min_energy_test.cpp for more information.
 
 namespace dynamical {

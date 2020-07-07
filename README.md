@@ -20,4 +20,3 @@ Specific examples and formal documentation have not been created yet, but the [t
 
 - [EECS16B Spring 2020](https://inst.eecs.berkeley.edu/~ee16b/sp20/)
 - [*Feedback Systems* by Astrom and Murray](http://www.cds.caltech.edu/~murray/amwiki/index.php?title=Main_Page)
-- [ETH Zurich's *control-toolbox* library](https://github.com/ethz-adrl/control-toolbox)

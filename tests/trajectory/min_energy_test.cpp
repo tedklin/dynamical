@@ -56,15 +56,19 @@ TEST(Trajectory, MinEnergy_Simple) {
 // This test gives more insight on the effectiveness of the current minimum
 // energy trajectory generation method.
 //
-// From inspecting the output, it seems that when the system matrices are small,
-// 9 times out of 10, the min energy path effectively gets the simulated plant
-// to the target. There are several cases where the plant gets close but doesn't
-// quite reach the target (could be corrected easily by feedback). There are
-// also a few cases where the plant goes way off (largest error I've seen was
-// 500%).
+// From inspecting the output, it seems that when the system matrices are small
+// in magnitude, 9 times out of 10, the min energy path effectively gets the
+// simulated plant to the target. There are several cases where the plant gets
+// close but doesn't quite reach the target (could be corrected easily by
+// feedback). There are also a few cases where the plant goes way off (largest
+// error I've seen was 500%).
 //
-// However, when the matrices are large (more variance?), the min energy path
-// almost always leads the plant WAY off (on several orders of magnitude!).
+// However, when the matrices are large in magnitude (more variance?), the min
+// energy path almost always leads the plant WAY off (on several orders of
+// magnitude!).
+//
+// Increasing the number of steps also seems to increase the chances of
+// generating a singular (C * C^T).
 //
 // TODO: figure out what causes these errors in min energy path creation.
 TEST(Trajectory, MinEnergy_Random) {
@@ -78,9 +82,6 @@ TEST(Trajectory, MinEnergy_Random) {
 
   int controllable_systems_generated = 0, total_systems_generated = 50;
 
-  // Increasing the number of steps increases the chances of generating a
-  // singular controllability matrix (the current min energy path method relies
-  // on an invertible controllability matrix).
   int num_steps = 10;
 
   for (int i = 0; i != total_systems_generated; ++i) {
