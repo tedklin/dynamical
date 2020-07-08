@@ -47,8 +47,7 @@ class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
 
     Eigen::FullPivLU<decltype(C_CT)> lu(C_CT);
     if (!lu.isInvertible()) {
-      throw dynamical_error(
-          "min energy trajectory: controllability matrix not invertible.");
+      throw dynamical_error("min energy trajectory: (C * C^T) not invertible.");
     }
 
     input_sequence_ =
@@ -66,7 +65,6 @@ class MinEnergy : public Trajectory<state_dim, input_dim, Scalar> {
       throw dynamical_error(
           "min energy trajectory: tried to access step out of range!");
     }
-
     return input_sequence_.block(step * input_dim, 0, input_dim, 1);
   }
 

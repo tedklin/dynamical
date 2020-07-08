@@ -24,8 +24,8 @@ Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
     int num_steps_allowed = state_dim) {
   Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix(
       state_dim, (num_steps_allowed * input_dim));
-  Eigen::Matrix<Scalar, state_dim, input_dim> step_block = plant.B_;
 
+  Eigen::Matrix<Scalar, state_dim, input_dim> step_block = plant.B_;
   for (int step = 0; step != num_steps_allowed; ++step) {
     for (int block_index = 0; block_index != input_dim; ++block_index) {
       int controllability_col = (step * input_dim) + block_index;
@@ -41,11 +41,11 @@ Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_controllable(
     const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
-  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix =
-      get_controllability_matrix(plant);
-  Eigen::ColPivHouseholderQR<decltype(controllability_matrix)> qr_decomp(
-      controllability_matrix);
+  Eigen::ColPivHouseholderQR<
+      Eigen::Matrix<Scalar, state_dim, state_dim * input_dim>>
+      qr_decomp(get_controllability_matrix(plant));
   auto rank = qr_decomp.rank();
+
   return rank >= state_dim;
 }
 
@@ -55,8 +55,8 @@ Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>
 get_observability_matrix(
     const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant) {
   Eigen::Matrix<Scalar, output_dim * state_dim, state_dim> observability_matrix;
-  Eigen::Matrix<Scalar, output_dim, state_dim> step_block = plant.C_;
 
+  Eigen::Matrix<Scalar, output_dim, state_dim> step_block = plant.C_;
   for (int step = 0; step != state_dim; ++step) {
     for (int block_index = 0; block_index != output_dim; ++block_index) {
       int observability_row = (step * output_dim) + block_index;
@@ -75,12 +75,11 @@ bool is_observable(
   if (lu.isInvertible()) {
     return true;
   }
-
-  Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> observability_matrix =
-      get_observability_matrix(plant);
-  Eigen::ColPivHouseholderQR<decltype(observability_matrix)> qr_decomp(
-      observability_matrix);
+  Eigen::ColPivHouseholderQR<
+      Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>>
+      qr_decomp(get_observability_matrix(plant));
   auto rank = qr_decomp.rank();
+
   return rank >= state_dim;
 }
 
@@ -119,10 +118,8 @@ bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
                                         Scalar>& discrete_plant,
                const Feedback<state_dim, input_dim, Scalar>& feedback) {
   // std::cout << "running discrete stability check...\n\n";
-
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       discrete_plant.A_ + discrete_plant.B_ * feedback.GetK();
-
   return stability_helper(dynamics_matrix, true);
 }
 
@@ -130,7 +127,6 @@ template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
                                         Scalar>& discrete_plant) {
   // std::cout << "running discrete stability check...\n\n";
-
   return stability_helper(discrete_plant.A_, true);
 }
 
@@ -139,10 +135,8 @@ bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
                                           Scalar>& continuous_plant,
                const Feedback<state_dim, input_dim, Scalar>& feedback) {
   // std::cout << "running continuous stability check...\n\n";
-
   Eigen::Matrix<Scalar, state_dim, state_dim> dynamics_matrix =
       continuous_plant.A_ + continuous_plant.B_ * feedback.GetK();
-
   return stability_helper(dynamics_matrix, false);
 }
 
@@ -150,7 +144,6 @@ template <int state_dim, int input_dim, int output_dim, typename Scalar>
 bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
                                           Scalar>& continuous_plant) {
   // std::cout << "running continuous stability check...\n\n";
-
   return stability_helper(continuous_plant.A_, false);
 }
 

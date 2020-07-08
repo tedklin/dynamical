@@ -82,8 +82,6 @@ class Plant {
 
   void EnableNoise(double noise_stddev) {
     noise_present_ = true;
-
-    // TODO: profile this?
     noise_distribution_.reset(new std::normal_distribution<>{0, noise_stddev});
   }
 
