@@ -1,3 +1,9 @@
+// State feedback controller as seen in A&M "Feedback Systems".
+
+// The Observer (and thus the complete Controller) only support discrete-time
+// systems, but the Feedback component is the same for both discrete-time and
+// continuous-time.
+
 #pragma once
 
 #include "dynamical/lti/plant.hpp"
@@ -7,12 +13,6 @@
 #include <memory>
 
 #include "Eigen/Dense"
-
-// State feedback controller as seen in A&M "Feedback Systems".
-
-// The Observer (and thus the complete Controller) only support discrete-time
-// systems, but the Feedback component is the same for both discrete-time and
-// continuous-time.
 
 namespace dynamical {
 namespace lti {

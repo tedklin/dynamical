@@ -1,3 +1,7 @@
+// Various analysis functions, including controllability/observability checks,
+// stability checks, and discretization (by diagonalization) of continuous-time
+// plant models.
+
 #pragma once
 
 #include "dynamical/lti/controller.hpp"
@@ -9,10 +13,6 @@
 #include <iostream>
 
 #include "Eigen/Dense"
-
-// Various analysis functions, including controllability/observability checks,
-// stability checks, and discretization (by diagonalization) of continuous-time
-// plant models.
 
 namespace dynamical {
 namespace lti {
@@ -44,9 +44,8 @@ bool is_controllable(
   Eigen::ColPivHouseholderQR<
       Eigen::Matrix<Scalar, state_dim, state_dim * input_dim>>
       qr_decomp(get_controllability_matrix(plant));
-  auto rank = qr_decomp.rank();
 
-  return rank >= state_dim;
+  return qr_decomp.rank() >= state_dim;
 }
 
 // TODO: test
@@ -78,9 +77,8 @@ bool is_observable(
   Eigen::ColPivHouseholderQR<
       Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>>
       qr_decomp(get_observability_matrix(plant));
-  auto rank = qr_decomp.rank();
 
-  return rank >= state_dim;
+  return qr_decomp.rank() >= state_dim;
 }
 
 // TODO: extend to continuous systems with zero-real-part eigenvalues (see

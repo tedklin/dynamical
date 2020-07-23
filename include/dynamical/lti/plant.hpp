@@ -1,3 +1,5 @@
+// Simulation for plants, with support for artificial noise.
+
 #pragma once
 
 #include "dynamical/math/integral.hpp"
@@ -7,8 +9,6 @@
 #include <random>
 
 #include "Eigen/Dense"
-
-// Simulation for plants, with support for artificial noise.
 
 namespace dynamical {
 namespace lti {

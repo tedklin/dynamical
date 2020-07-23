@@ -1,8 +1,8 @@
+// Abstract base class for all trajectories.
+
 #pragma once
 
 #include "Eigen/Dense"
-
-// Abstract base class for all trajectories.
 
 namespace dynamical {
 namespace trajectory {

@@ -1,16 +1,12 @@
-# CUSTOM =========
-
-# I use this directory to store a copy of libraries like gtest so VSCode
-# can still use autocomplete (after manually setting include paths).
-# This is generally considered bad practice, so only store copies of libraries
-# here AFTER you ensure it builds on CMake alone!!
+# I use this directory to store a copy of the external dependencies that my
+# CMake setup fetches directly from git. This is to ensure functionality like
+# autocomplete still works locally.
 hidden_thirdparty/
 
+# gdb
 .gdb_history
 
-# ================
-
-# https://github.com/github/gitignore/blob/master/CMake.gitignore
+# cmake
 CMakeCache.txt
 CMakeFiles
 CMakeScripts
@@ -22,7 +18,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-# https://github.com/autodiff/autodiff/blob/master/.gitignore
 # Build files
 build/
 

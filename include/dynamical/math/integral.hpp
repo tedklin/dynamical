@@ -1,11 +1,11 @@
-#pragma once
-
-#include <functional>  // for std::function
-
 // Numerical integration methods.
 
 // This hasn't been tested rigorously yet. Runge-kutta was only tested in the
 // context of discretization with very small steps (see lti/plant_test.cpp).
+
+#pragma once
+
+#include <functional>  // for std::function
 
 namespace dynamical {
 namespace numerical {

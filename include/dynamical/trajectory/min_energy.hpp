@@ -1,11 +1,3 @@
-#pragma once
-
-#include "dynamical/trajectory/trajectory.hpp"
-
-#include "dynamical/utils/exception.hpp"
-
-#include "Eigen/Dense"
-
 // Uses the minimum norm solution to create a zero-indexed stepwise trajectory.
 // https://inst.eecs.berkeley.edu/~ee16b/sp20/lecture/12a.pdf
 //
@@ -24,6 +16,14 @@
 //
 // I'm not entirely sure about the reliability of this. The accuracy is
 // not always satisfactory, see min_energy_test.cpp for more information.
+
+#pragma once
+
+#include "dynamical/trajectory/trajectory.hpp"
+
+#include "dynamical/utils/exception.hpp"
+
+#include "Eigen/Dense"
 
 namespace dynamical {
 namespace trajectory {
