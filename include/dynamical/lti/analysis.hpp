@@ -18,10 +18,61 @@ namespace dynamical {
 namespace lti {
 namespace analysis {
 
+// =============================
+// Interface
+// =============================
+
 template <int state_dim, int input_dim, int output_dim, typename Scalar>
 Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
     const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
-    int num_steps_allowed = state_dim) {
+    int num_steps_allowed = state_dim);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_controllable(
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+Eigen::Matrix<Scalar, output_dim * state_dim, state_dim>
+get_observability_matrix(
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_observable(
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
+                                        Scalar>& discrete_plant,
+               const Feedback<state_dim, input_dim, Scalar>& feedback);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const sim::DiscretePlant<state_dim, input_dim, output_dim,
+                                        Scalar>& discrete_plant);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
+                                          Scalar>& continuous_plant,
+               const Feedback<state_dim, input_dim, Scalar>& feedback);
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+bool is_stable(const sim::ContinuousPlant<state_dim, input_dim, output_dim,
+                                          Scalar>& continuous_plant);
+
+// Discretization by diagonalization.
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+sim::DiscretePlant<state_dim, input_dim, output_dim, std::complex<double>>
+discretize(const sim::ContinuousPlant<state_dim, input_dim, output_dim, Scalar>&
+               continuous_plant,
+           double dt);
+
+// =============================
+// Implementation
+// =============================
+
+template <int state_dim, int input_dim, int output_dim, typename Scalar>
+Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> get_controllability_matrix(
+    const sim::Plant<state_dim, input_dim, output_dim, Scalar>& plant,
+    int num_steps_allowed) {
   Eigen::Matrix<Scalar, state_dim, Eigen::Dynamic> controllability_matrix(
       state_dim, (num_steps_allowed * input_dim));
 
