@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/tedklin/dynamical.svg?token=EQ1yVHxTi52hGw7TPsW5&branch=master)](https://travis-ci.com/tedklin/dynamical)
 
-*DynamiCal* is a (WIP) control systems framework that aims to be both educational and applicable, with an intuitive interface and careful software design in C++.
+*DynamiCal* is a (WIP) header-only control systems framework that aims to be both educational and applicable, with an intuitive interface and careful software design in C++.
 
 This project was born out of a desire to further explore some ideas taught in an introductory class on systems ([EECS16B @Berkeley](https://inst.eecs.berkeley.edu/~ee16b/sp20/)). Concepts like state-space representation, stability, and feedback piqued my interest in particular. While 16B covered these from a mostly theoretical perspective, I wanted to see what the theory would translate to in software for real applications.
 
@@ -14,6 +14,7 @@ Specific examples and formal documentation have not been created yet, but the [t
 
 
 ## Dependencies
+
 - [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
 
 ## References

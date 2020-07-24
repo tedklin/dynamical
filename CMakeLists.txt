@@ -62,8 +62,8 @@ if(${CMAKE_VERSION} VERSION_LESS 3.14)
   endmacro()
 endif()
 
-# compiled library code is here
-add_subdirectory(src)
+# library is here (headers only)
+add_subdirectory(include/dynamical)
 
 # executable code is here
 add_subdirectory(examples)
