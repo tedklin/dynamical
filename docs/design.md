@@ -64,6 +64,7 @@ Later down the road:
 - Heavy use of templates.
     - I initially saw the use of templates to encode the dimensions of a system (number of states, inputs, and outputs) in [ETH Zurich's *control-toolbox* library](https://github.com/ethz-adrl/control-toolbox).
     - Things get pretty messy at times (see lti/analysis.hpp), but I don't really see another rational way to express the absolute dependency on system dimensions.
+        - This is also why I made the overall project header-only.
 - Namespaces designed to be very specific (around three levels) to signify intention clearly.
     - I'm not sure if this is generally considered good or bad practice, but I feel like it's made code easier to follow.
 - Avoided *auto* with Eigen types, even where it makes sense / passes tests.

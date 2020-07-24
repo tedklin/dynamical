@@ -9,7 +9,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # If no default build type is specified, use the presence of a .git
   # directory to determine whether to build Debug or Release.
   set(default_build_type "Release")
-  if(EXISTS "${CMAKE_SOURCE_DIR}/.git")
+  if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/.git")
     set(default_build_type "Debug")
   endif()
   if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -35,19 +35,19 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # since it calls enable_testing, which must be in the
   # main CMakeLists.
   include(CTest)
-endif()
 
-# ccache
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
-    set(CMAKE_CUDA_COMPILER_LAUNCHER "${CCACHE_PROGRAM}") # CMake 3.9+
+  # ccache
+  find_program(CCACHE_PROGRAM ccache)
+  if(CCACHE_PROGRAM)
+      set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+      set(CMAKE_CUDA_COMPILER_LAUNCHER "${CCACHE_PROGRAM}") # CMake 3.9+
+  endif()
 endif()
 
 # set the cmake module path of the project
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # find eigen using FindEigen3.cmake in cmake/ folder
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED)
 
 # FetchContent
 include(FetchContent)
@@ -69,6 +69,7 @@ add_subdirectory(include/dynamical)
 add_subdirectory(examples)
 
 # test code is here
+# only added if this is the main project
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
   add_subdirectory(tests)
 endif()
