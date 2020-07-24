@@ -1,4 +1,4 @@
-// Simulation for plants, with support for artificial noise.
+// Simulation for plants, with support for artificial Gaussian noise.
 
 #pragma once
 
@@ -35,37 +35,7 @@ class Plant {
         const D_MatrixType& D = D_MatrixType::Zero())
       : A_(A), B_(B), C_(C), D_(D), x_initial_(x_initial), x_(x_initial) {
     std::random_device rd;
-    random_generator_.reset(new std::mt19937(rd()));
-  }
-
-  // TODO: revisit copy-control members' treatment of the unique_ptrs
-  Plant(const Plant& other)
-      : A_(other.A_),
-        B_(other.B_),
-        C_(other.C_),
-        D_(other.D_),
-        x_initial_(other.x_initial_),
-        x_(other.x_),
-        y_(other.y_) {
-    std::random_device rd;
-    random_generator_.reset(new std::mt19937(rd()));
-  }
-
-  Plant& operator=(const Plant& rho) {
-    A_ = rho.A_;
-    B_ = rho.B_;
-    C_ = rho.C_;
-    D_ = (rho.D_);
-    x_initial_ = (rho.x_initial);
-    x_ = (rho.x_);
-    y_ = (rho.y_);
-
-    noise_present_ = false;
-    noise_stddev_ = 0;
-    std::random_device rd;
-    random_generator_.reset(new std::mt19937(rd()));
-
-    return *this;
+    random_generator_ = std::make_shared<std::mt19937>(rd());
   }
 
   virtual void Update(const u_VectorType& u) = 0;
@@ -80,12 +50,13 @@ class Plant {
 
   const x_VectorType& GetXInitial() const { return x_initial_; }
 
-  void EnableNoise(double noise_stddev) {
-    noise_present_ = true;
-    noise_distribution_.reset(new std::normal_distribution<>{0, noise_stddev});
+  void EnableOutputNoise(double noise_stddev) {
+    output_noise_present_ = true;
+    output_noise_distribution_ =
+        std::make_shared<std::normal_distribution<>>(0, noise_stddev);
   }
 
-  void DisableNoise() { noise_present_ = false; }
+  void DisableNoise() { output_noise_present_ = false; }
 
   const A_MatrixType A_;
   const B_MatrixType B_;
@@ -97,10 +68,10 @@ class Plant {
   x_VectorType x_;
   y_VectorType y_ = y_VectorType::Zero();
 
-  bool noise_present_ = false;
+  bool output_noise_present_ = false;
   double noise_stddev_ = 0;
-  std::unique_ptr<std::mt19937> random_generator_;
-  std::unique_ptr<std::normal_distribution<>> noise_distribution_;
+  std::shared_ptr<std::mt19937> random_generator_;
+  std::shared_ptr<std::normal_distribution<>> output_noise_distribution_;
 
   // TODO: process noise
   // TODO: different noise distributions for each scalar variable (pass in a
@@ -108,7 +79,7 @@ class Plant {
 
   y_VectorType GenerateOutputNoise() {
     return y_VectorType::NullaryExpr(
-        [&]() { return (*noise_distribution_)(*random_generator_); });
+        [&]() { return (*output_noise_distribution_)(*random_generator_); });
   }
 };
 
@@ -125,7 +96,7 @@ class DiscretePlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
     this->y_ = this->C_ * this->x_ + this->D_ * u;
     this->x_ = this->A_ * this->x_ + this->B_ * u;
 
-    if (this->noise_present_) {
+    if (this->output_noise_present_) {
       this->y_ += this->GenerateOutputNoise();
     }
   }
@@ -146,7 +117,7 @@ class ContinuousPlant : public Plant<state_dim, input_dim, output_dim, Scalar> {
   void Update(const u_VectorType& u) override {
     Update(u, timestep_);
 
-    if (this->noise_present_) {
+    if (this->output_noise_present_) {
       this->y_ += this->GenerateOutputNoise();
     }
   }

@@ -144,14 +144,14 @@ TEST(Plant, GaussianNoise) {
                     SimplePlant::B_MatrixType::Zero());
 
   std::cout << "=============\nrealistic noise\n\n";
-  plant.EnableNoise(0.1);
+  plant.EnableOutputNoise(0.1);
   for (int i = 0; i != 20; ++i) {
     plant.Update(SimplePlant::u_VectorType::Zero());
     std::cout << plant.GetY() << "\n\n";
   }
 
   std::cout << "=============\na lot of noise\n\n";
-  plant.EnableNoise(1);
+  plant.EnableOutputNoise(1);
   for (int i = 0; i != 10; ++i) {
     plant.Update(SimplePlant::u_VectorType::Zero());
     std::cout << plant.GetY() << "\n\n";
