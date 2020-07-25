@@ -21,9 +21,9 @@
 
 #include "dynamical/trajectory/trajectory.hpp"
 
-#include "dynamical/utils/exception.hpp"
-
 #include "Eigen/Dense"
+
+#include "dynamical/utils/exception.hpp"
 
 namespace dynamical {
 namespace trajectory {

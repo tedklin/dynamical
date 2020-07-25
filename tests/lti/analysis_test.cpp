@@ -1,14 +1,14 @@
 #include "dynamical/lti/analysis.hpp"
 
-#include "dynamical/lti/plant.hpp"
-#include "dynamical/utils/test_utils.hpp"
-
 #include <cmath>
 #include <iostream>
 #include <stdexcept>
 
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
+
+#include "dynamical/lti/plant.hpp"
+#include "dynamical/utils/test_utils.hpp"
 
 namespace dynamical_testing {
 

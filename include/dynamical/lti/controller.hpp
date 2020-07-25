@@ -6,13 +6,13 @@
 
 #pragma once
 
-#include "dynamical/lti/plant.hpp"
-#include "dynamical/trajectory/trajectory.hpp"
-#include "dynamical/utils/exception.hpp"
-
 #include <memory>
 
 #include "Eigen/Dense"
+
+#include "dynamical/lti/plant.hpp"
+#include "dynamical/trajectory/trajectory.hpp"
+#include "dynamical/utils/exception.hpp"
 
 namespace dynamical {
 namespace lti {

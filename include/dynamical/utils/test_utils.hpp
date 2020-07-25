@@ -1,11 +1,11 @@
 #pragma once
 
-#include "dynamical/utils/exception.hpp"
-
 #include <cmath>
 #include <iostream>
 
 #include "Eigen/Dense"
+
+#include "dynamical/utils/exception.hpp"
 
 namespace dynamical_testing {
 namespace dynamical_test_utils {

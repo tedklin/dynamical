@@ -1,12 +1,12 @@
 #include "dynamical/lti/controller.hpp"
 
-#include "dynamical/lti/plant.hpp"
-#include "dynamical/utils/test_utils.hpp"
-
 #include <iostream>
 
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
+
+#include "dynamical/lti/plant.hpp"
+#include "dynamical/utils/test_utils.hpp"
 
 namespace dynamical_testing {
 

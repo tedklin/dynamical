@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "dynamical/lti/controller.hpp"
-#include "dynamical/lti/plant.hpp"
-#include "dynamical/utils/exception.hpp"
-
 #include <cmath>
 #include <complex>
 #include <iostream>
 
 #include "Eigen/Dense"
+
+#include "dynamical/lti/controller.hpp"
+#include "dynamical/lti/plant.hpp"
+#include "dynamical/utils/exception.hpp"
 
 namespace dynamical {
 namespace lti {
