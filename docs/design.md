@@ -24,24 +24,23 @@ This living document is intended to lay out some design decisions and non-obviou
 
 ## Levels of functionality (currently planned)
 
-1. Discrete-time linear control system design
-2. Linear systems simulation and analysis
-3. Nonlinear control system design
+1. Discrete-time LTI control system design
+2. LTI systems simulation and analysis
+3. Nonlinear (NTI) control system design
 4. Integrated solvers and implementations for optimal control
 
 
 ## Current state of project
 
-Mostly finished:
+Finished / mostly finished:
 - Controllability
 - Stability and Feedback
 - Discretization
-- Simple simulations
+- Plant simulations with Gaussian noise generations
+- Observer and (linear) Kalman filter in discrete-time
 
 Still testing / fixing:
 - Minimum energy trajectory
-- Observer concepts and Kalman filter in discrete-time
-    - Random noise generation in simulated plants
 - Complete discrete-time State Feedback Controller simulation
 
 Later down the road:
@@ -173,9 +172,9 @@ Later down the road:
 - *namespace dynamical::lti*
 - *type: class template derived from Observer*
 - overall notes:
-    - [Kalman filter information](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/06-Multivariate-Kalman-Filters.ipynb)
-        - For reference, the F and H matrices in the context of Kalman filters map to the A and C matrices in state-space context. The measurement z maps to the y passed into the Controller. The optimal "Kalman gain" maps to the observer gain L.
-        - I haven't fully learned the background math for Kalman filtering yet, I just skimmed applicational/intuitive stuff from the link above and set it up within the project framework.
+    - [Practical guide to Kalman filters (Labbe)](https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python)
+        - For reference, the F and H matrices in the context of Kalman filters map to the A and C matrices in state-space context. The measurement z maps to the y passed into the Controller. The optimal *Kalman gain* maps to the observer gain L.
+        - I haven't fully learned the background math for Kalman filtering yet, I just studied the applicational/intuitive approach from the link above.
 
 *Controller*
 - *namespace dynamical::lti*

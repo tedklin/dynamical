@@ -1,5 +1,9 @@
 // State feedback controller as seen in A&M "Feedback Systems".
 
+// The Controller class provides an interface for integrating
+// Trajectory (dynamical/trajectory/trajectory.hpp), Feedback, Observer
+// components.
+
 // The Observer (and thus the complete Controller) only support discrete-time
 // systems, but the Feedback component is the same for both discrete-time and
 // continuous-time.
@@ -109,7 +113,7 @@ class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
   using
       typename Observer<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
 
-  using Q_MatrixType = Eigen::Matrix<Scalar, state_dim, state_dim>;
+  using P_MatrixType = Eigen::Matrix<Scalar, state_dim, state_dim>;
   using R_MatrixType = Eigen::Matrix<Scalar, output_dim, output_dim>;
 
   void UpdateEstimate(const y_VectorType& y, const u_VectorType& u) {
@@ -135,15 +139,30 @@ class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
     this->L_ = P_ * this->C_.transpose() * S_.inverse();
   }
 
+  // TODO: find numerically stable version of this calculation?
   void CovarianceUpdate() { P_ = P_ - (this->L_ * this->C_ * P_); }
 
  private:
-  // TODO: what are reasonable default values for these?
-  // if no reasonable default values, make them part of constructor
-  Q_MatrixType Q_ = Q_MatrixType::Zero();
-  R_MatrixType R_ = R_MatrixType::Zero();
-  Q_MatrixType P_ = Q_MatrixType::Zero();
-  R_MatrixType S_ = R_MatrixType::Zero();
+  // Quick summary of what these matrices represent, based on Labbe's set of
+  // Jupyter notebooks for practical Kalman filter design:
+  //
+  // Recall covariance matrices encode variances on the diagonal and covariances
+  // on non-diagonal elements. Variance can roughly be thought of here as how
+  // much we trust something. For now, we will ignore initial settings of
+  // covariances (they will update themselves as the filter evolves).
+  //
+  // If we *do not* have a lot of trust in our model, then we should design our
+  // process variances (along the diagonal of Q) to have *larger* magnitude.
+  // Similarly, if we *do* have a lot of trust in our estimate of the initial
+  // state, then our initial P should reflect that with a diagonal of elements
+  // of *smaller* magnitude. The key is to set variances that truly reflect your
+  // confidence in the data.
+
+  P_MatrixType P_;  // state covariance matrix
+  P_MatrixType Q_;  // process noise covariance matrix
+  R_MatrixType R_;  // measurement noise covariance matrix
+
+  R_MatrixType S_ = R_MatrixType::Zero();  // "innovation" covariance matrix
 };
 
 template <int state_dim, int input_dim, int output_dim,

@@ -21,7 +21,7 @@ class NoiseGenerator {
     generator_ = std::make_shared<std::mt19937>(rd());
     for (int i = 0; i != stddev.rows(); ++i) {
       if (stddev(i, 0) < 0) {
-        throw dynamical_error("Noise generation stddev less than 0!");
+        throw dynamical_error("noise generation: stddev less than 0!");
       }
       if (stddev(i, 0) == 0) {
         // Create empty shared_ptr as placeholder for an element with no noise.
