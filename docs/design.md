@@ -97,6 +97,12 @@ Later down the road:
         - Rule of Zero.
     - TODO:
         - investigate what happens under the hood for all types that I don't explicitly define copy-control for.
+- Default pointer type is shared_ptr
+    - Reasoning:
+        - Smart pointers avoid the need to do explicit memory management.
+        - unique_ptr requires explicit definition of copy-control members.
+    - Notes:
+        - If performance becomes an issue, profile and see if changing to raw pointers helps.
 - Many of my functions that aren't part of a class return by value.
     - Reasoning:
         - More guaranteed behavior.
@@ -124,18 +130,11 @@ Later down the road:
 - overall notes
     - Design with inheritance was used despite there only being two children of Plant. This is because there are several instances where the distinction between discrete-time and continuous-time plants are ignored (e.g. controllability and observability), but there are also significant differences between the two (discrete-time systems are characterized by difference equations whereas continuous-time plants are characterized by differential equations).
 - constructor
-    - deleted default constructor
-        - In general, it doesn't make sense to create a Plant without any dynamics.
-        - Note that if users do need to create a Plant without any dynamics, they can still do so explicitly.
     - one defined constructor, with the initial state vector as the first argument and default arguments for the C and D matrices.
         - In EECS16B, the concept of output is not taught and the C and D matrices are ignored. It is assumed that all states are outputs (x_vec = y_vec, so C = Identity) and that there is no feedthrough (D = Zero).
             - This is also why the template parameter num_outputs has a default argument of num_states.
         - It is more common to need to specify a nonzero initial state vector x than to define D explicitly. I also wanted to keep the ABCD matrices together for more intuitive instantiation (as opposed to sandwiching like A,B,x,C,D). As a result, the initial state vector goes as the first argument.
             - It should be noted that this opens up opportunity for error when initializing a Plant type implementation (i.e. trying to initialize a DiscretePlant with arguments ABCD, forgetting that the A will become x, B will become A, and so forth). I'm fairly certain the compiler would throw an error if this does happen, but I haven't tested this.
-- gaussian noise generator
-    - [Eigen docs for *NullaryExpr*](https://eigen.tuxfamily.org/dox/classEigen_1_1DenseBase.html#a57fed90701b138c1d38ec52871f4cef1)
-    - The current implementation is a pair of unique_ptrs to both the generator (std::mt19937) and the distribution (std::normal_distribution<>). The presence of unique_ptrs is what forced me to define the copy-constructor and copy-assign member.
-    - An alternative might be to define another type purely for random generation of Eigen matrices with more controlled / complex distributions than the one given by Random()?
 
 *DiscretePlant*
 - *namespace dynamical::lti::sim*
@@ -168,7 +167,7 @@ Later down the road:
         - I couldn't think of any instances where the distinction between discrete-time and continuous-time observers can be ignored, so inheritance didn't seem appropriate. An enum seems like the easiest way to keep track of what type of system the observer is dealing with.
         - However, at the moment, I'm not sure about the practicality of actually using a complete state feedback controller based in continuous-time (numerical integration / time sync errors add up), so the current implementation is just for discrete time.
 - constructor
-    - The order of parameters in Observer's constructors is mostly influenced by the order of Plant's constructor. It can be argued that there are situations where users wouldn't specify an initial state estimate (in which case a default argument of zeros would be appropriate), but at this point users should understand they can just pass in *EigenMatrixType::Zero()*.
+    - The order of parameters in Observer's constructors was mostly designed to reflect the order of Plant's constructor. It can be argued that there are situations where users wouldn't specify an initial state estimate (in which case a default argument of zeros would be appropriate), but at this point users should understand they can just pass in *EigenMatrixType::Zero()*.
 
 *KalmanFilter*
 - *namespace dynamical::lti*

@@ -1,12 +1,12 @@
 #include "dynamical/lti/plant.hpp"
 
-#include "dynamical/lti/analysis.hpp"
-#include "dynamical/utils/test_utils.hpp"
-
 #include <iostream>
 
 #include "Eigen/Dense"
 #include "gtest/gtest.h"
+
+#include "dynamical/lti/analysis.hpp"
+#include "dynamical/utils/test_utils.hpp"
 
 namespace dynamical_testing {
 
@@ -131,8 +131,8 @@ TEST(Plant, PropagateContinuousDynamics) {
 
 // TODO: figure out scheme to actually evaluate this instead of just reading
 // output
-TEST(Plant, GaussianNoise) {
-  // Observe the effects of the gaussian noise generator on a static plant.
+TEST(Plant, OutputNoise) {
+  // Observe the effects of the output noise generator on a static plant.
 
   constexpr int num_states = 3, num_inputs = 1;
   using SimplePlant =
@@ -143,22 +143,26 @@ TEST(Plant, GaussianNoise) {
   SimplePlant plant(x, SimplePlant::A_MatrixType::Identity(),
                     SimplePlant::B_MatrixType::Zero());
 
+  SimplePlant::y_VectorType output_stddev;
+
   std::cout << "=============\nrealistic noise\n\n";
-  plant.EnableOutputNoise(0.1);
+  output_stddev << 0.1, 0.1, 0.1;
+  plant.EnableOutputNoise(output_stddev);
   for (int i = 0; i != 20; ++i) {
     plant.Update(SimplePlant::u_VectorType::Zero());
     std::cout << plant.GetY() << "\n\n";
   }
 
   std::cout << "=============\na lot of noise\n\n";
-  plant.EnableOutputNoise(1);
+  output_stddev << 1, 1, 1;
+  plant.EnableOutputNoise(output_stddev);
   for (int i = 0; i != 10; ++i) {
     plant.Update(SimplePlant::u_VectorType::Zero());
     std::cout << plant.GetY() << "\n\n";
   }
 
   std::cout << "=============\nno noise\n\n";
-  plant.DisableNoise();
+  plant.DisableOutputNoise();
   for (int i = 0; i != 10; ++i) {
     plant.Update(SimplePlant::u_VectorType::Zero());
     std::cout << plant.GetY() << "\n\n";
