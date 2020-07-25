@@ -161,6 +161,14 @@ TEST(Plant, OutputNoise) {
     std::cout << plant.GetY() << "\n\n";
   }
 
+  std::cout << "=============\nnoise only on second state\n\n";
+  output_stddev << 0, 0.1, 0;
+  plant.EnableOutputNoise(output_stddev);
+  for (int i = 0; i != 10; ++i) {
+    plant.Update(SimplePlant::u_VectorType::Zero());
+    std::cout << plant.GetY() << "\n\n";
+  }
+
   std::cout << "=============\nno noise\n\n";
   plant.DisableOutputNoise();
   for (int i = 0; i != 10; ++i) {

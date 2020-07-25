@@ -20,12 +20,16 @@ class NoiseGenerator {
     std::random_device rd;
     generator_ = std::make_shared<std::mt19937>(rd());
     for (int i = 0; i != stddev.rows(); ++i) {
-      if (stddev(i, 0) <= 0) {
-        throw dynamical_error(
-            "Noise generation stddev input not greater than 0!");
+      if (stddev(i, 0) < 0) {
+        throw dynamical_error("Noise generation stddev less than 0!");
       }
-      distributions_.push_back(
-          std::make_shared<std::normal_distribution<>>(0, stddev(i, 0)));
+      if (stddev(i, 0) == 0) {
+        // Create empty shared_ptr as placeholder for an element with no noise.
+        distributions_.emplace_back();
+      } else {
+        distributions_.push_back(
+            std::make_shared<std::normal_distribution<>>(0, stddev(i, 0)));
+      }
     }
   }
 
@@ -34,7 +38,11 @@ class NoiseGenerator {
   Eigen::Matrix<double, Eigen::Dynamic, 1> GetNoise() {
     Eigen::Matrix<double, Eigen::Dynamic, 1> w(dimension_);
     for (int i = 0; i != w.rows(); ++i) {
-      w(i, 0) = (*distributions_[i])(*generator_);
+      if (distributions_[i]) {
+        w(i, 0) = (*distributions_[i])(*generator_);
+      } else {
+        w(i, 0) = 0;
+      }
     }
     return w;
   }
