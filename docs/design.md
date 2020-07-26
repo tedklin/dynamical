@@ -1,6 +1,6 @@
 # Design document
 
-This living document is intended to lay out some design decisions and non-obvious code. It's for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It doesn't cover all functionality and isn't intended to be used as formal documentation.
+This living document is intended to lay out software design decisions and non-obvious code. It's for keeping track of running TODOs related to design, as well as the opportunity to fix bad C++ practices / wrong assumptions about control system design. It doesn't cover all functionality and isn't intended to be used as formal documentation.
 
 
 ## Some driving design goals
@@ -8,8 +8,7 @@ This living document is intended to lay out some design decisions and non-obviou
 1. User-safety
     - Minimize undefined behavior.
     - Force users to state what they want as explicitly as possible.
-    - Every class and every function should do exactly what their names say.
-    - Maintain const-correctness.
+    - Careful and intentional naming for classes and functions.
     - Tests! Lots of tests!
 2. Modularity
     - Break down systems into their smallest components while still maintaining realistic abstraction for usability.
@@ -18,8 +17,8 @@ This living document is intended to lay out some design decisions and non-obviou
         - Prefer to define non-core functionality as generic functions that act on a given object instead of member functions contained within each core object.
 3. Efficiency
     - Optimizations like enabling move operations where it makes sense.
-        - Keep in mind optimizations the compiler itself can make too, like copy elision / RVO.
-    - Learn how to use tools like sanitizers and profilers. 
+        - Keep in mind optimizations the compiler itself can make, like copy elision / RVO.
+    - Learn how to use tools like sanitizers and profilers.
 
 
 ## Levels of functionality (currently planned)
@@ -28,27 +27,6 @@ This living document is intended to lay out some design decisions and non-obviou
 2. LTI systems simulation and analysis
 3. Nonlinear (NTI) control system design
 4. Integrated solvers and implementations for optimal control
-
-
-## Current state of project
-
-Finished / mostly finished:
-- Controllability
-- Stability and Feedback
-- Discretization
-- Plant simulations with Gaussian noise generations
-- Observer and (linear) Kalman filter in discrete-time
-
-Still testing / fixing:
-- Minimum energy trajectory
-- Complete discrete-time State Feedback Controller simulation
-
-Later down the road:
-- Integration with ROS
-- Linearization
-- Gain scheduling?
-- More optimization-based control?
-- Stochastic processes?
 
 
 ## Theory notes
