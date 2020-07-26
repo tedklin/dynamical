@@ -16,7 +16,7 @@ Although initial software design decisions were made with people coming from a 1
 
 ## Current status
 
-As of now, all functionality is for time-invariant systems.
+As of now, all functionality is for linear time-invariant systems.
 
 Finished / mostly finished:
 - Controllability
@@ -25,7 +25,6 @@ Finished / mostly finished:
 - Plant simulation with Gaussian noise generation
 
 Under development / implemented but untested:
-- Linearization
 - Minimum energy trajectory generation
 - Observer and linear Kalman filter in discrete-time
 - Complete discrete-time State Feedback Controller simulation
@@ -34,7 +33,7 @@ Later down the road:
 - ROS integration
 - Linear Kalman filter design
 - Optimization-based control?
-- Nonlinear state estimation?
+- Nonlinear systems?
 
 Specific examples and formal documentation have not been created yet, but the [tests](https://github.com/tedklin/dynamical/tree/master/tests) might give a basic idea of general usage.
 
@@ -44,7 +43,6 @@ An in-depth design document can be found [here](https://github.com/tedklin/dynam
 ## Dependencies
 
 - [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page) (Linear algebra)
-- [autodiff]() (Automatic differentiation)
 
 ## References
 

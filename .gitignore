@@ -1,7 +1,7 @@
 # I use this directory to store a copy of the external dependencies that my
 # CMake setup fetches directly from git. This is to ensure functionality like
 # autocomplete still works locally.
-hidden_thirdparty/
+thirdparty/hidden
 
 # gdb
 .gdb_history
