@@ -27,7 +27,7 @@ Finished / mostly finished:
 Under development / implemented but untested:
 - Minimum energy trajectory generation
 - Observer and linear Kalman filter in discrete-time
-- Complete discrete-time state feedback Controller simulation
+- Fully-synthesized state feedback controller simulation in discrete-time
 
 Later down the road:
 - ROS integration
