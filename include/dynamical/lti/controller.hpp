@@ -106,41 +106,63 @@ template <int state_dim, int input_dim, int output_dim,
           typename Scalar = double>
 class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
  public:
-  using Observer<state_dim, input_dim, output_dim, Scalar>::Observer;
+  using A_MatrixType = Eigen::Matrix<Scalar, state_dim, state_dim>;
+  using B_MatrixType = Eigen::Matrix<Scalar, state_dim, input_dim>;
+  using C_MatrixType = Eigen::Matrix<Scalar, output_dim, state_dim>;
+  using D_MatrixType = Eigen::Matrix<Scalar, output_dim, input_dim>;
+  using x_VectorType = Eigen::Matrix<Scalar, state_dim, 1>;
+  using y_VectorType = Eigen::Matrix<Scalar, output_dim, 1>;
+  using u_VectorType = Eigen::Matrix<Scalar, input_dim, 1>;
 
-  using
-      typename Observer<state_dim, input_dim, output_dim, Scalar>::y_VectorType;
-  using
-      typename Observer<state_dim, input_dim, output_dim, Scalar>::u_VectorType;
-
+  using L_MatrixType = Eigen::Matrix<Scalar, state_dim, output_dim>;
   using P_MatrixType = Eigen::Matrix<Scalar, state_dim, state_dim>;
   using R_MatrixType = Eigen::Matrix<Scalar, output_dim, output_dim>;
 
+  KalmanFilter() = delete;
+
+  KalmanFilter(const x_VectorType& x_hat_initial, const A_MatrixType& A,
+               const B_MatrixType& B, const C_MatrixType& C,
+               const D_MatrixType& D, P_MatrixType P, P_MatrixType Q,
+               R_MatrixType R)
+      : Observer<state_dim, input_dim, output_dim, Scalar>(
+            x_hat_initial, L_MatrixType::Zero(), A, B, C, D),
+        P_(P),
+        Q_(Q),
+        R_(R) {}
+
+  KalmanFilter(
+      const x_VectorType& x_hat_initial,
+      const sim::DiscretePlant<state_dim, input_dim, output_dim, Scalar>& plant,
+      P_MatrixType P, P_MatrixType Q, R_MatrixType R)
+      : Observer<state_dim, input_dim, output_dim, Scalar>(
+            x_hat_initial, L_MatrixType::Zero(), plant),
+        P_(P),
+        Q_(Q),
+        R_(R) {}
+
   void UpdateEstimate(const y_VectorType& y, const u_VectorType& u) {
-    KalmanGainUpdate();
-
-    // "Predict and correct" in one step.
-    this->y_hat_ = this->C_ * this->x_hat_ + this->D_ * u;
-    this->x_hat_ =
-        this->A_ * this->x_hat_ + this->B_ * u + this->L_ * (y - this->y_hat_);
-
-    CovarianceUpdate();
-  }
-
-  void KalmanGainUpdate() {
+    // Predict state covariance matrix.
     P_ = this->A_ * P_ * this->A_.transpose() + Q_;
-    S_ = this->C_ * P_ * this->C_.transpose() + R_;
 
+    // Calculate system uncertainty.
+    S_ = this->C_ * P_ * this->C_.transpose() + R_;
     Eigen::FullPivLU<decltype(S_)> lu(S_);
     if (!lu.isInvertible()) {
       throw dynamical_error("kalman filter: S matrix not invertible.");
     }
 
+    // Update Kalman gain.
     this->L_ = P_ * this->C_.transpose() * S_.inverse();
-  }
 
-  // TODO: find numerically stable version of this calculation?
-  void CovarianceUpdate() { P_ = P_ - (this->L_ * this->C_ * P_); }
+    // Predict and update state estimate.
+    this->y_hat_ = this->C_ * this->x_hat_ + this->D_ * u;
+    this->x_hat_ =
+        this->A_ * this->x_hat_ + this->B_ * u + this->L_ * (y - this->y_hat_);
+
+    // TODO: find more numerically stable version of this calculation?
+    // Update state covariance matrix.
+    P_ = P_ - (this->L_ * this->C_ * P_);
+  }
 
  private:
   // Quick summary of what these matrices represent, based on Labbe's set of
@@ -162,7 +184,7 @@ class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
   P_MatrixType Q_;  // process noise covariance matrix
   R_MatrixType R_;  // measurement noise covariance matrix
 
-  R_MatrixType S_ = R_MatrixType::Zero();  // "innovation" covariance matrix
+  R_MatrixType S_ = R_MatrixType::Zero();  // system uncertainty
 };
 
 template <int state_dim, int input_dim, int output_dim,

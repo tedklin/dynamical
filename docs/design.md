@@ -68,6 +68,7 @@ This living document is intended to lay out software design decisions and non-ob
     - Reasoning:
         - Eigen matrices are default initialized to undefined values, so it's important to make sure every Eigen class data member is properly initialized. Each class' set of constructors was carefully designed to force users to explicitly define what they want.
     - Notes:
+        - Although the default constructor is automatically deleted whenever there are non-default constructors defined, I still put explicit *= delete* statements for clarity.
         - Might make some synthesized copy-control members dysfunctional?
 - No explicitly defined copy-control members unless needed.
     - Reasoning:
