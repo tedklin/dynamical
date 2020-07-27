@@ -122,8 +122,8 @@ class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
 
   KalmanFilter(const x_VectorType& x_hat_initial, const A_MatrixType& A,
                const B_MatrixType& B, const C_MatrixType& C,
-               const D_MatrixType& D, P_MatrixType P, P_MatrixType Q,
-               R_MatrixType R)
+               const D_MatrixType& D, const P_MatrixType& P,
+               const P_MatrixType& Q, const R_MatrixType& R)
       : Observer<state_dim, input_dim, output_dim, Scalar>(
             x_hat_initial, L_MatrixType::Zero(), A, B, C, D),
         P_(P),
@@ -133,7 +133,7 @@ class KalmanFilter : public Observer<state_dim, input_dim, output_dim, Scalar> {
   KalmanFilter(
       const x_VectorType& x_hat_initial,
       const sim::DiscretePlant<state_dim, input_dim, output_dim, Scalar>& plant,
-      P_MatrixType P, P_MatrixType Q, R_MatrixType R)
+      const P_MatrixType& P, const P_MatrixType& Q, const R_MatrixType& R)
       : Observer<state_dim, input_dim, output_dim, Scalar>(
             x_hat_initial, L_MatrixType::Zero(), plant),
         P_(P),
