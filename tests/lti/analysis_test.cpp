@@ -451,9 +451,6 @@ TEST(Discretization, SimpleSecondOrder) {
   constexpr int num_states = 2, num_inputs = 1, num_outputs = 2;
   using ContinuousPlant =
       dynamical::lti::sim::ContinuousPlant<num_states, num_inputs, num_outputs>;
-  using DiscretePlant =
-      dynamical::lti::sim::DiscretePlant<num_states, num_inputs, num_outputs,
-                                         std::complex<double>>;
 
   ContinuousPlant::A_MatrixType test_A;
   test_A << /*[[*/ 0, 1 /*]*/,
