@@ -1,3 +1,5 @@
+**Note: This project is currently on hold until I get to take my school's classes on linear systems theory, optimization theory, random processes, or any other relevant topics. My hope is that taking those classes will give me a better foundation to build off of for this project.**
+
 # DynamiCal
 
 [![Build Status](https://travis-ci.com/tedklin/dynamical.svg?token=EQ1yVHxTi52hGw7TPsW5&branch=master)](https://travis-ci.com/tedklin/dynamical)
